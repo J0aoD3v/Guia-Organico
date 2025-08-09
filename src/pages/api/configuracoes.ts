@@ -1,7 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import clientPromise from "../../lib/db";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   try {
     const client = await clientPromise;
     const db = client.db("guia-organico");
