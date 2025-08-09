@@ -64,9 +64,11 @@ Nota: alguns arquivos e pastas acima serão criados ao longo do desenvolvimento.
 - Estilo de código: padrão Next.js/TS. Linters poderão ser adicionados depois.
 
 Padrões em uso:
+
 - Singleton para reuso da conexão com o MongoDB em `db.ts`.
 
 Padrões planejados:
+
 - Repository para encapsular acesso a dados.
 - MVC ou DDD para organização de camadas.
 - Observer para notificações e tempo real.
@@ -147,15 +149,18 @@ API->>DB: Atualiza status
 ## 5. Roadmap
 
 Concluído:
+
 - Projeto base Next.js com TypeScript.
 - Conexão com MongoDB e GET `/api/products`.
 
 Pendências imediatas:
+
 - Definir nome do banco explicitamente em `client.db("<nome>")`.
 - Criar `public/` e `components/` conforme a UI evoluir.
 - Definir modelos e validação para `products` e iniciar CRUD completo.
 
 Futuro:
+
 - Fluxo de solicitações e notificações por email.
 - Painel administrativo.
 - Testes automatizados e métricas.
@@ -188,4 +193,4 @@ Nota: são referências para orientar o processo. O escopo atual ainda não impl
 ## 9. Padrões de projeto
 
 - Em uso: Singleton para conexão MongoDB em `db.ts`.
-- Planejados: Repository, MVC ou DDD, Observer, Factory.
+- Planejados: Repository, MVC (Model-View-Controller), Observer, Factory.

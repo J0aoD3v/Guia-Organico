@@ -27,11 +27,13 @@ Em breve disponível online (Vercel).
 ## 🚀 Funcionalidades
 
 Implementado (MVP atual):
+
 - App base Next.js + TypeScript.
 - Conexão com MongoDB.
 - API GET `/api/products` (listagem simples).
 
 Planejado:
+
 - Busca por insumos (texto, categoria, imagem).
 - Cadastro de solicitações para certificadoras.
 - Painel Admin para gestão de insumos e pedidos.
@@ -40,10 +42,12 @@ Planejado:
 ## 🛠️ Tecnologias
 
 Em uso:
+
 - Next.js 15, React 19, TypeScript.
 - MongoDB Atlas (driver `mongodb`).
 
 Planejadas/avaliadas:
+
 - TailwindCSS (estilização).
 - NextAuth.js (autenticação).
 - Resend/Nodemailer (emails).
@@ -62,16 +66,16 @@ Planejadas/avaliadas:
 
 ## 📅 Roadmap resumido
 
-1) MVP inicial: estrutura do app, conexão MongoDB, GET `/api/products`, iniciar CRUD.
-2) Solicitações e notificações: fluxo completo de pedidos de autorização (planejado).
-3) Busca avançada e filtros (planejado).
-4) Recursos extras: estatísticas e área pública (planejado).
+1. MVP inicial: estrutura do app, conexão MongoDB, GET `/api/products`, iniciar CRUD.
+2. Solicitações e notificações: fluxo completo de pedidos de autorização (planejado).
+3. Busca avançada e filtros (planejado).
+4. Recursos extras: estatísticas e área pública (planejado).
 
 ## 📚 Normas e padrões
 
 - Consulte detalhes na documentação: [docs/GUIA_ORGANICO_DOCUMENTACAO.md](./docs/GUIA_ORGANICO_DOCUMENTACAO.md)
-	- Normas: ISO/IEC 25010, IEEE 830, ISO/IEC 12207 (referência metodológica).
-	- Padrões de projeto: em uso (Singleton) e planejados (Repository, MVC/DDD, Observer, Factory).
+  - Normas: ISO/IEC 25010, IEEE 830, ISO/IEC 12207 (referência metodológica).
+  - Padrões de projeto: em uso (Singleton) e planejados (Repository, MVC/DDD, Observer, Factory).
 
 ## Licença
 
