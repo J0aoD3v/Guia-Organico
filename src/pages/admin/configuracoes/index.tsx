@@ -19,11 +19,37 @@ export default function ConfiguracoesAdmin() {
 			return;
 		}
 
+		async function fetchConfiguracoes() {
+			try {
+				const res = await fetch('/api/configuracoes');
+				const data = await res.json();
+				setLimitePedidos(data.limitePedidos ?? 5);
+			} catch (err) {
+				console.error('Erro ao buscar configurações:', err);
+			}
+		}
+
+		fetchConfiguracoes();
 		setLoading(false);
 	}, [session, status, router]);
 
-	const salvarConfiguracoes = () => {
-		alert(`Configurações salvas com sucesso!\n- Limite de pedidos: ${limitePedidos}\n- Email notificações: ${emailNotificacoes ? 'Ativo' : 'Inativo'}\n- Modo manutenção: ${manutencao ? 'Ativo' : 'Inativo'}\n\n(Funcionalidade em desenvolvimento)`);
+	const salvarConfiguracoes = async () => {
+		try {
+			const res = await fetch('/api/configuracoes', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ limitePedidos }),
+			});
+
+			if (!res.ok) {
+				throw new Error('Erro ao salvar configurações');
+			}
+
+			alert('Configurações salvas com sucesso!');
+		} catch (err) {
+			console.error('Erro ao salvar configurações:', err);
+			alert('Erro ao salvar configurações');
+		}
 	};
 
 	if (status === 'loading' || loading) {
