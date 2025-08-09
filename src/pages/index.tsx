@@ -1,4 +1,5 @@
 import Head from "next/head";
+import Link from "next/link";
 import UserAvatar from "../components/auth/UserAvatar";
 
 export default function Home() {
@@ -35,23 +36,113 @@ export default function Home() {
             gap: "20px",
             marginTop: "40px"
           }}>
-            <div style={{ 
+            <Link href="/buscar" style={{ 
               padding: "20px", 
               border: "1px solid #ddd", 
-              borderRadius: "8px" 
-            }}>
+              borderRadius: "8px",
+              textDecoration: "none",
+              color: "inherit",
+              cursor: "pointer",
+              transition: "border-color 0.2s"
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = "#0070f3"}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = "#ddd"}
+            >
               <h3>🔍 Busca de Insumos</h3>
               <p>Encontre rapidamente insumos autorizados por categoria ou texto.</p>
-            </div>
+              <button style={{
+                marginTop: "10px",
+                padding: "8px 16px",
+                backgroundColor: "#0070f3",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer"
+              }}>
+                Pesquisar Agora
+              </button>
+            </Link>
 
-            <div style={{ 
+            <Link href="/pedidos/novo" style={{ 
               padding: "20px", 
               border: "1px solid #ddd", 
-              borderRadius: "8px" 
-            }}>
+              borderRadius: "8px",
+              textDecoration: "none",
+              color: "inherit",
+              cursor: "pointer",
+              transition: "border-color 0.2s"
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = "#10b981"}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = "#ddd"}
+            >
               <h3>📋 Solicitações</h3>
               <p>Solicite autorização de novos insumos diretamente às certificadoras.</p>
-            </div>
+              <button style={{
+                marginTop: "10px",
+                padding: "8px 16px",
+                backgroundColor: "#10b981",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer"
+              }}>
+                Solicitar Agora
+              </button>
+            </Link>
+
+            <Link href="/categorias" style={{ 
+              padding: "20px", 
+              border: "1px solid #ddd", 
+              borderRadius: "8px",
+              textDecoration: "none",
+              color: "inherit",
+              cursor: "pointer",
+              transition: "border-color 0.2s"
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = "#f59e0b"}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = "#ddd"}
+            >
+              <h3>📂 Categorias</h3>
+              <p>Navegue pelos insumos organizados por categoria.</p>
+              <button style={{
+                marginTop: "10px",
+                padding: "8px 16px",
+                backgroundColor: "#f59e0b",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer"
+              }}>
+                Ver Categorias
+              </button>
+            </Link>
+
+            <Link href="/sobre" style={{ 
+              padding: "20px", 
+              border: "1px solid #ddd", 
+              borderRadius: "8px",
+              textDecoration: "none",
+              color: "inherit",
+              cursor: "pointer",
+              transition: "border-color 0.2s"
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = "#8b5cf6"}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = "#ddd"}
+            >
+              <h3>ℹ️ Sobre o App</h3>
+              <p>Conheça mais sobre nossa plataforma e propósito.</p>
+              <button style={{
+                marginTop: "10px",
+                padding: "8px 16px",
+                backgroundColor: "#8b5cf6",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer"
+              }}>
+                Saiba Mais
+              </button>
+            </Link>
           </div>
         </main>
       </div>
