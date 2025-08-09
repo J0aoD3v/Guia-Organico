@@ -1,6 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import clientPromise from "../../lib/db";
 import { ObjectId } from "mongodb";
+import formidable from "formidable";
+import fs from "fs";
+import path from "path";
 
 export const config = {
   api: {
@@ -8,18 +11,45 @@ export const config = {
   },
 };
 
-import formidable from "formidable";
-import fs from "fs";
-
 async function parseForm(
   req: NextApiRequest
 ): Promise<{ fields: any; files: any }> {
   return new Promise((resolve, reject) => {
-    const form = formidable({ multiples: false });
-    form.parse(req, (err, fields, files) => {
-      if (err) reject(err);
-      else resolve({ fields, files });
-    });
+    console.log("📋 [PARSEFORM] Iniciando parse do formulário...");
+    console.log("📋 [PARSEFORM] Content-Type:", req.headers['content-type']);
+    
+    try {
+      const uploadDir = path.join(process.cwd(), "uploads");
+      console.log("📁 [PARSEFORM] Upload directory:", uploadDir);
+      
+      // Verificar se o diretório uploads existe
+      if (!fs.existsSync(uploadDir)) {
+        console.log("📁 [PARSEFORM] Criando diretório uploads...");
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      
+      const form = formidable({ 
+        multiples: false,
+        uploadDir: uploadDir,
+        keepExtensions: true,
+        maxFileSize: 10 * 1024 * 1024, // 10MB
+      });
+      
+      form.parse(req, (err, fields, files) => {
+        if (err) {
+          console.error("❌ [PARSEFORM] Erro ao fazer parse:", err);
+          reject(err);
+        } else {
+          console.log("✅ [PARSEFORM] Parse concluído");
+          console.log("📦 [PARSEFORM] Fields:", Object.keys(fields));
+          console.log("📎 [PARSEFORM] Files:", Object.keys(files));
+          resolve({ fields, files });
+        }
+      });
+    } catch (error) {
+      console.error("❌ [PARSEFORM] Erro na configuração:", error);
+      reject(error);
+    }
   });
 }
 
@@ -36,6 +66,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   console.log("🚀 [API] Iniciando handler pedidos:", req.method);
+  console.log("🔍 [API] Headers:", req.headers['content-type']);
 
   try {
     const client = await clientPromise;
@@ -60,12 +91,25 @@ export default async function handler(
     }
 
     if (req.method === "POST") {
+      console.log("📨 [API] Processando POST para pedidos...");
       try {
+        console.log("🔄 [API] Iniciando parseForm...");
         const { fields, files } = await parseForm(req);
+        console.log("✅ [API] ParseForm concluído");
+        console.log("📋 [API] Fields recebidos:", fields);
+        console.log("📎 [API] Files recebidos:", files);
+        
         const fichaFile = Array.isArray(files.ficha)
           ? files.ficha[0]
           : files.ficha;
         const bulaFile = Array.isArray(files.bula) ? files.bula[0] : files.bula;
+        
+        console.log("📁 [API] Processando arquivos:", {
+          fichaFile: fichaFile ? fichaFile.originalFilename || fichaFile.newFilename : 'nenhum',
+          bulaFile: bulaFile ? bulaFile.originalFilename || bulaFile.newFilename : 'nenhum'
+        });
+
+        console.log("�️ [API] Gerando caminhos dos arquivos...");
 
         const fichaPath = fichaFile
           ? `uploads/${Date.now()}_${
@@ -78,13 +122,19 @@ export default async function handler(
             }`
           : null;
 
+        console.log("📂 [API] Caminhos gerados:", { fichaPath, bulaPath });
+
+        console.log("💾 [API] Copiando arquivos...");
         if (fichaFile && fichaFile.filepath) {
+          console.log("📄 [API] Copiando ficha técnica...");
           fs.copyFileSync(fichaFile.filepath, fichaPath);
         }
         if (bulaFile && bulaFile.filepath) {
+          console.log("📄 [API] Copiando bula...");
           fs.copyFileSync(bulaFile.filepath, bulaPath);
         }
 
+        console.log("📝 [API] Criando objeto pedido...");
         const pedido = {
           email: Array.isArray(fields.email) ? fields.email[0] : fields.email,
           nome: Array.isArray(fields.nome) ? fields.nome[0] : fields.nome,
@@ -102,10 +152,17 @@ export default async function handler(
           status: "pendente",
           createdAt: new Date(),
         };
-        await pedidos.insertOne(pedido);
-        return res.status(201).json({ ok: true });
+        
+        console.log("📋 [API] Objeto pedido criado:", pedido);
+        console.log("💾 [API] Salvando no banco de dados...");
+        
+        const result = await pedidos.insertOne(pedido);
+        console.log("✅ [API] Pedido salvo com sucesso. ID:", result.insertedId);
+        
+        return res.status(201).json({ ok: true, id: result.insertedId });
       } catch (err) {
         console.error("❌ [API] Erro no POST:", err);
+        console.error("❌ [API] Stack trace:", err.stack);
         return res
           .status(500)
           .json({ error: "Erro ao salvar pedido", details: err.message });
@@ -174,9 +231,17 @@ export default async function handler(
 
     res.status(405).end();
   } catch (err) {
-    console.error("❌ [API] Erro geral:", err);
+    console.error("❌ [API] Erro geral na API de pedidos:", err);
+    console.error("❌ [API] Stack trace completo:", err.stack);
+    console.error("❌ [API] Método da requisição:", req.method);
+    console.error("❌ [API] URL da requisição:", req.url);
     return res
       .status(500)
-      .json({ error: "Erro interno do servidor", details: err.message });
+      .json({ 
+        error: "Erro interno do servidor", 
+        details: err.message,
+        method: req.method,
+        url: req.url
+      });
   }
 }
