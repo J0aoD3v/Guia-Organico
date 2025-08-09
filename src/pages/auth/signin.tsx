@@ -121,22 +121,10 @@ export default function SignIn() {
             </p>
             <button
               type="button"
-              onClick={async () => {
+              onClick={() => {
                 setLoading(true);
                 setError("");
-                const result = await signIn("google", { redirect: false });
-                if (result?.error) {
-                  setError("Erro ao autenticar com Google");
-                  setLoading(false);
-                } else {
-                  // Buscar sessão para saber o role
-                  const session = await getSession();
-                  if (session?.user?.role === "admin") {
-                    router.push("/admin");
-                  } else {
-                    router.push("/perfil");
-                  }
-                }
+                signIn("google", { callbackUrl: "/perfil" });
               }}
               style={{
                 width: "100%",
