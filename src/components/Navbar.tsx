@@ -1,11 +1,40 @@
 import Link from "next/link";
 import UserAvatar from "./auth/UserAvatar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 
 export default function Navbar() {
+  const { data: session } = useSession();
   const [open, setOpen] = useState(false);
+  const [limitePedidos, setLimitePedidos] = useState<number | null>(null);
+  const [pedidosMes, setPedidosMes] = useState<number | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    async function fetchDados() {
+      try {
+        const [resPedidos, resLimite] = await Promise.all([
+          fetch(`/api/pedidos?email=${session?.user?.email}`),
+          fetch(`/api/configuracoes`),
+        ]);
+
+        const pedidosData = await resPedidos.json();
+        const limiteData = await resLimite.json();
+
+        setPedidosMes(pedidosData.count ?? 0);
+        setLimitePedidos(limiteData.limitePedidos ?? 5);
+      } catch (err) {
+        console.error("Erro ao buscar dados de pedidos e limite:", err);
+      }
+    }
+
+    if (session) {
+      fetchDados();
+    }
+  }, [session]);
+
+  const isSolicitacaoBloqueada = pedidosMes !== null && limitePedidos !== null && pedidosMes >= limitePedidos;
 
   return (
     <nav style={{ borderBottom: "1px solid #e5e7eb", padding: "12px 20px" }}>
@@ -136,29 +165,34 @@ export default function Navbar() {
             🌱 Todos os Insumos
           </Link>
           
-          <Link 
-            href="/pedidos/novo" 
-            style={{ 
-              color: "#111827", 
+          <button
+            disabled={isSolicitacaoBloqueada}
+            onClick={() => {
+              if (!isSolicitacaoBloqueada) router.push("/pedidos/novo");
+            }}
+            style={{
+              color: isSolicitacaoBloqueada ? "#9ca3af" : "#111827",
               textDecoration: "none",
               padding: "8px 12px",
               borderRadius: "4px",
               display: "flex",
               alignItems: "center",
               gap: "8px",
-              backgroundColor: router.pathname === "/pedidos/novo" ? "#e5e7eb" : "transparent"
+              backgroundColor: isSolicitacaoBloqueada ? "#f3f4f6" : "transparent",
+              border: "none",
+              cursor: isSolicitacaoBloqueada ? "not-allowed" : "pointer",
+              fontSize: "14px"
             }}
-            onMouseEnter={(e) => {
-              if (router.pathname !== "/pedidos/novo") e.currentTarget.style.backgroundColor = "#e5e7eb";
-            }}
-            onMouseLeave={(e) => {
-              if (router.pathname !== "/pedidos/novo") e.currentTarget.style.backgroundColor = "transparent";
-            }}
-            onClick={() => setOpen(false)}
           >
             📋 Solicitar Autorização
-          </Link>
-          
+          </button>
+
+          {isSolicitacaoBloqueada && (
+            <div style={{ fontSize: "12px", color: "#ef4444", marginTop: "8px" }}>
+              Limite atingido. Próxima liberação: 01/{new Date().getMonth() + 2}/{new Date().getFullYear()} ou entre em contato com o suporte.
+            </div>
+          )}
+
           <Link 
             href="/sobre" 
             style={{ 

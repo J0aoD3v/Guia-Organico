@@ -1,8 +1,39 @@
 import Head from "next/head";
 import Link from "next/link";
 import UserAvatar from "../components/auth/UserAvatar";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
 export default function Home() {
+  const { data: session } = useSession();
+  const [limitePedidos, setLimitePedidos] = useState<number | null>(null);
+  const [pedidosMes, setPedidosMes] = useState<number | null>(null);
+
+  useEffect(() => {
+    async function fetchDados() {
+      try {
+        const [resPedidos, resLimite] = await Promise.all([
+          fetch(`/api/pedidos?email=${session?.user?.email}`),
+          fetch(`/api/configuracoes`),
+        ]);
+
+        const pedidosData = await resPedidos.json();
+        const limiteData = await resLimite.json();
+
+        setPedidosMes(pedidosData.count ?? 0);
+        setLimitePedidos(limiteData.limitePedidos ?? 5);
+      } catch (err) {
+        console.error("Erro ao buscar dados de pedidos e limite:", err);
+      }
+    }
+
+    if (session) {
+      fetchDados();
+    }
+  }, [session]);
+
+  const isSolicitacaoBloqueada = pedidosMes !== null && limitePedidos !== null && pedidosMes >= limitePedidos;
+
   return (
     <>
       <Head>
@@ -63,32 +94,35 @@ export default function Home() {
               </button>
             </Link>
 
-            <Link href="/pedidos/novo" style={{ 
+            <div style={{ 
               padding: "20px", 
               border: "1px solid #ddd", 
               borderRadius: "8px",
               textDecoration: "none",
               color: "inherit",
-              cursor: "pointer",
-              transition: "border-color 0.2s"
+              cursor: isSolicitacaoBloqueada ? "not-allowed" : "pointer",
+              transition: "border-color 0.2s",
+              backgroundColor: isSolicitacaoBloqueada ? "#f3f4f6" : "transparent"
             }}
-            onMouseEnter={(e) => e.currentTarget.style.borderColor = "#10b981"}
+            onMouseEnter={(e) => {
+              if (!isSolicitacaoBloqueada) e.currentTarget.style.borderColor = "#10b981";
+            }}
             onMouseLeave={(e) => e.currentTarget.style.borderColor = "#ddd"}
             >
               <h3>📋 Solicitações</h3>
               <p>Solicite autorização de novos insumos diretamente às certificadoras.</p>
-              <button style={{
+              <button disabled={isSolicitacaoBloqueada} style={{
                 marginTop: "10px",
                 padding: "8px 16px",
-                backgroundColor: "#10b981",
-                color: "white",
+                backgroundColor: isSolicitacaoBloqueada ? "#d1d5db" : "#10b981",
+                color: isSolicitacaoBloqueada ? "#6b7280" : "white",
                 border: "none",
                 borderRadius: "4px",
-                cursor: "pointer"
+                cursor: isSolicitacaoBloqueada ? "not-allowed" : "pointer"
               }}>
-                Solicitar Agora
+                {isSolicitacaoBloqueada ? "Limite Atingido" : "Solicitar Agora"}
               </button>
-            </Link>
+            </div>
 
             <Link href="/sobre" style={{ 
               padding: "20px", 
