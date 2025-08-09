@@ -7,6 +7,23 @@ export default function UserAvatar() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [pedidosMes, setPedidosMes] = useState<number | null>(null);
+
+  // Buscar contagem de pedidos do mês
+  useEffect(() => {
+    async function fetchPedidosMes() {
+      if (session?.user?.email) {
+        try {
+          const res = await fetch(`/api/pedidos?email=${session.user.email}`);
+          const data = await res.json();
+          setPedidosMes(data.count ?? 0);
+        } catch (err) {
+          setPedidosMes(null);
+        }
+      }
+    }
+    if (isOpen) fetchPedidosMes();
+  }, [isOpen, session?.user?.email]);
 
   // Fechar dropdown quando clicar fora
   useEffect(() => {
@@ -161,6 +178,31 @@ export default function UserAvatar() {
               👤 Ver Perfil
             </button>
 
+            <button
+              onClick={() => {
+                setIsOpen(false);
+                router.push("/pedidos");
+              }}
+              style={{
+                width: "100%",
+                padding: "8px 16px",
+                textAlign: "left",
+                backgroundColor: "transparent",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "14px",
+                color: "#374151"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#f3f4f6";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+              }}
+            >
+              📦 Ver meus pedidos
+            </button>
+
             {session.user?.role === "admin" && (
               <button
                 onClick={() => {
@@ -214,6 +256,17 @@ export default function UserAvatar() {
             >
               🚪 Sair
             </button>
+
+            {/* Pedidos disponíveis no mês */}
+            <div style={{
+              width: "100%",
+              padding: "8px 16px",
+              fontSize: "13px",
+              color: "#6b7280",
+              textAlign: "center"
+            }}>
+              {pedidosMes !== null ? `${pedidosMes}/5 pedidos mês disponíveis` : "Carregando pedidos..."}
+            </div>
           </div>
         </div>
       )}
