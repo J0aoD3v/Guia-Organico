@@ -1,79 +1,173 @@
 # 📗 Guia Orgânico — Documentação
 
-Documento enxuto e alinhado ao estado atual do projeto. Itens aspiracionais foram movidos para “Futuro” para evitar ambiguidades.
+Documento formal, objetivo e claro. Apresenta a visão final do produto e o status atual do projeto.
 
-## 1) Estrutura de Pastas (estado atual)
+## 1. Estrutura de pastas — visão final
 
 ```plaintext
 guia-organico/
 ├── docs/
 │   └── GUIA_ORGANICO_DOCUMENTACAO.md
+├── public/
+│   ├── favicon.ico
+│   └── images/
 ├── src/
+│   ├── components/
+│   │   ├── layout/
+│   │   └── ui/
+│   ├── hooks/
 │   ├── lib/
-│   │   └── db.ts                 # Conexão MongoDB
-│   └── pages/
-│       ├── index.tsx             # Página inicial
-│       └── api/
-│           └── products.ts       # Listagem de produtos (GET)
+│   │   ├── db.ts                 # Conexão MongoDB — padrão: Singleton
+│   │   ├── repositories/
+│   │   │   └── products.repository.ts
+│   │   └── services/
+│   ├── pages/
+│   │   ├── index.tsx             # Página inicial
+│   │   ├── admin/
+│   │   │   └── index.tsx         # Painel administrativo
+│   │   └── api/
+│   │       ├── products.ts       # Listagem de produtos — método GET
+│   │       └── requests.ts       # Solicitações de autorização — método POST
+│   ├── styles/
+│   │   ├── globals.css
+│   │   └── variables.css
+│   ├── types/
+│   │   └── product.ts
+│   └── utils/
+│       └── validations.ts
+├── tests/
+│   ├── api/
+│   └── unit/
+├── .env.example
+├── .gitignore
 ├── next-env.d.ts
 ├── package.json
 ├── tsconfig.json
 └── README.md
 ```
 
-Observações:
-- Pastas como `public/`, `components/`, `hooks/`, `styles/`, `prisma/` e `tests/` não possuem conteúdo no momento (ou ainda não existem). Crie-as conforme a necessidade durante o desenvolvimento.
-- Existe um arquivo `.env` local (não deve ser versionado). O repositório agora contém um `.env.example` com o nome das variáveis esperadas.
+Nota: alguns arquivos e pastas acima serão criados ao longo do desenvolvimento.
 
-## 2) Escopo atual
+## 2. Checklist do que já foi feito
 
-- App Next.js + TypeScript inicializado.
-- Conexão com MongoDB via `mongodb` em `src/lib/db.ts` (padrão Singleton).
-- Rota GET `/api/products` retornando documentos da coleção `products`.
+- Projeto Next.js com TypeScript inicializado.
+- Driver `mongodb` instalado e conexão implementada em `src/lib/db.ts` com Singleton.
+- Rota de API GET `/api/products` retornando documentos da coleção `products`.
+- `.gitignore` adicionado e `.env.example` criado. Arquivo `.env` removido do versionamento.
+- Build e checagem de tipos executam com sucesso.
 
-## 3) Convenções e padrões (objetivo e direto)
+## 3. Convenções e padrões
 
 - Linguagem: TypeScript.
-- Framework: Next.js 15 (conforme package.json).
-- Banco: MongoDB Atlas (URI via variável de ambiente `MONGODB_URI`).
-- Estilo de código: seguir o padrão do Next.js/TS por enquanto; linters poderão ser adicionados depois.
+- Framework: Next.js 15, conforme package.json.
+- Banco: MongoDB Atlas, variável de ambiente `MONGODB_URI`.
+- Estilo de código: padrão Next.js/TS. Linters poderão ser adicionados depois.
 
-Padrões de projeto em uso agora:
-- Singleton: reuso da conexão MongoDB (`db.ts`).
+Padrões em uso:
+- Singleton para reuso da conexão com o MongoDB em `db.ts`.
 
-Padrões planejados (quando o escopo crescer):
-- Repository (encapsular acesso a dados),
-- MVC/DDD (organização de camadas),
-- Observer (notificações/tempo real),
-- Factory (criação de entidades).
+Padrões planejados:
+- Repository para encapsular acesso a dados.
+- MVC ou DDD para organização de camadas.
+- Observer para notificações e tempo real.
+- Factory para criação de entidades.
 
-## 4) Diagramas (status)
+## 4. Diagramas — visão
 
-Os diagramas de casos de uso, classes e sequência originalmente descritos representam a visão futura do produto. Para o escopo atual (MVP inicial), eles são referenciais e não refletem funcionalidades implementadas. Mantidos como “Futuro” para não confundir.
+Os diagramas a seguir representam a visão pretendida do produto. Servem como referência de arquitetura e requisitos. Serão atualizados quando o escopo evoluir.
 
-## 5) Roadmap compacto
+### 4.1 Caso de uso
 
-Concluído (MVP inicial):
-- Projeto Next.js com TypeScript.
-- Dependência `mongodb` instalada e conexão implementada.
-- Endpoint GET `/api/products` funcional.
+```mermaid
+usecaseDiagram
+actor Produtor
+actor Certificadora
+actor Admin
 
-Próximos passos imediatos:
-- Não versionar `.env` (usar `.gitignore`).
-- Definir nome do banco explícito em `client.db('<nome>')` para evitar ambiguidade.
-- Criar `public/` (ativos estáticos) e `components/` conforme a UI evoluir.
-- Definir modelos/validação para `products` e iniciar CRUD completo.
+Produtor --> (Buscar insumo)
+Produtor --> (Enviar solicitação de autorização)
+Certificadora --> (Aprovar/Rejeitar solicitação)
+Admin --> (Gerenciar produtos)
+Admin --> (Gerenciar usuários)
+```
 
-Futuro (após CRUD):
-- Fluxo de solicitações e notificações (email).
-- Painel admin.
+### 4.2 Classes
+
+```mermaid
+classDiagram
+class Produtor {
+	+id: string
+	+nome: string
+	+email: string
+}
+
+class Certificadora {
+	+id: string
+	+nome: string
+	+email: string
+}
+
+class Produto {
+	+id: string
+	+nome: string
+	+categoria: string
+	+status: string
+}
+
+class Solicitacao {
+	+id: string
+	+produtoId: string
+	+produtorId: string
+	+status: string
+}
+
+Produtor "1" --> "*" Solicitacao
+Solicitacao "*" --> "1" Produto
+Certificadora "1" --> "*" Produto
+```
+
+### 4.3 Sequência
+
+```mermaid
+sequenceDiagram
+participant Produtor
+participant Frontend
+participant API
+participant DB
+participant Admin
+
+Produtor->>Frontend: Preenche solicitação
+Frontend->>API: POST /api/requests
+API->>DB: Salva solicitação pendente
+API-->>Admin: Notificação
+Admin->>API: Aprovar ou rejeitar
+API->>DB: Atualiza status
+```
+
+## 5. Roadmap
+
+Concluído:
+- Projeto base Next.js com TypeScript.
+- Conexão com MongoDB e GET `/api/products`.
+
+Pendências imediatas:
+- Definir nome do banco explicitamente em `client.db("<nome>")`.
+- Criar `public/` e `components/` conforme a UI evoluir.
+- Definir modelos e validação para `products` e iniciar CRUD completo.
+
+Futuro:
+- Fluxo de solicitações e notificações por email.
+- Painel administrativo.
 - Testes automatizados e métricas.
 
-## 6) Métricas (após MVP)
+## 6. Métricas planejadas
 
-Definir metas de desempenho e qualidade depois que o CRUD estiver estável (ex.: tempo de resposta da API, cobertura de testes, LCP).
+- Tempo de resposta da API em GET simples: até 300 ms.
+- LCP da página inicial: até 2,5 s.
+- Cobertura de testes: a partir de 80 por cento após introdução de testes.
+- Uptime em produção: a partir de 99,9 por cento.
 
-## 7) Variáveis de ambiente
+## 7. Variáveis de ambiente
 
 Criar um arquivo `.env` local com:
 
@@ -81,5 +175,17 @@ Criar um arquivo `.env` local com:
 MONGODB_URI="mongodb+srv://<usuario>:<senha>@<cluster>/?retryWrites=true&w=majority"
 ```
 
-Nunca commitar `.env`. Use o `.env.example` como referência.
+Não versionar `.env`. Usar o `.env.example` como referência.
 
+## 8. Normas e referências
+
+- ISO/IEC 25010 — Qualidade de produto de software.
+- IEEE 830 — Especificação de requisitos de software.
+- ISO/IEC 12207 — Processos do ciclo de vida de software.
+
+Nota: são referências para orientar o processo. O escopo atual ainda não implementa todas as práticas.
+
+## 9. Padrões de projeto
+
+- Em uso: Singleton para conexão MongoDB em `db.ts`.
+- Planejados: Repository, MVC ou DDD, Observer, Factory.
