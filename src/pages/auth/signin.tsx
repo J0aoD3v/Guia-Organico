@@ -46,12 +46,13 @@ export default function SignIn() {
         
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: "15px" }}>
-            <label htmlFor="email">Email:</label>
+            <label htmlFor="email">Usuário:</label>
             <input
               id="email"
-              type="email"
+              type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              placeholder="Digite seu usuário ou email"
               required
               style={{
                 width: "100%",
@@ -139,10 +140,6 @@ export default function SignIn() {
               Continuar com Google
             </button>
           </div>
-          
-          <p style={{ fontSize: "12px", color: "#666" }}>
-            Admin: <strong>admin</strong> / senha: <strong>af89d56f8b00bf3d32a3eee1962ed989bb29434c2e1dd7c6836c8b0bcb5175c0</strong>
-          </p>
         </div>
       </div>
     </>

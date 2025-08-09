@@ -12,14 +12,14 @@ export default NextAuth({
         params: {
           prompt: "consent",
           access_type: "offline",
-          response_type: "code"
-        }
-      }
+          response_type: "code",
+        },
+      },
     }),
     CredentialsProvider({
       name: "credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        email: { label: "Usuário", type: "text" },
         password: { label: "Senha", type: "password" },
       },
       async authorize(credentials) {
@@ -28,8 +28,11 @@ export default NextAuth({
         }
 
         // Admin hardcoded
-        if (credentials.email === "admin" && 
-            credentials.password === "af89d56f8b00bf3d32a3eee1962ed989bb29434c2e1dd7c6836c8b0bcb5175c0") {
+        if (
+          credentials.email === "admin" &&
+          credentials.password ===
+            "af89d56f8b00bf3d32a3eee1962ed989bb29434c2e1dd7c6836c8b0bcb5175c0"
+        ) {
           return {
             id: "admin",
             name: "Administrador",
@@ -74,9 +77,9 @@ export default NextAuth({
         try {
           const client = await clientPromise;
           const db = client.db("guia-organico");
-          
+
           const existingUser = await db.collection("users").findOne({
-            email: user.email
+            email: user.email,
           });
 
           if (!existingUser) {
@@ -85,7 +88,7 @@ export default NextAuth({
               email: user.email,
               role: "user",
               provider: "google",
-              createdAt: new Date()
+              createdAt: new Date(),
             });
           }
         } catch (error) {
