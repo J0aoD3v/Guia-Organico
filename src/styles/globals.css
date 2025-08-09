@@ -16,7 +16,9 @@ a {
 }
 
 /* Estilos para formulários */
-input, textarea, select {
+input,
+textarea,
+select {
   font-family: inherit;
 }
 
