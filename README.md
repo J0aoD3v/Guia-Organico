@@ -8,7 +8,9 @@ Em breve disponível online (Vercel).
 
 ## Documentação
 
-- Consulte a documentação técnica enxuta: [docs/GUIA_ORGANICO_DOCUMENTACAO.md](./docs/GUIA_ORGANICO_DOCUMENTACAO.md).
+Este projeto conta com documentação técnica completa seguindo padrões de **Engenharia de Software**
+
+- **📚 [Documentação Técnica](./docs/GUIA_ORGANICO_DOCUMENTACAO.md)** – Diagramas UML, estrutura do projeto, roadmap e métricas.
 
 ## Estado atual
 
@@ -75,7 +77,7 @@ Planejadas/avaliadas:
 
 - Consulte detalhes na documentação: [docs/GUIA_ORGANICO_DOCUMENTACAO.md](./docs/GUIA_ORGANICO_DOCUMENTACAO.md)
   - Normas: ISO/IEC 25010, IEEE 830, ISO/IEC 12207 (referência metodológica).
-  - Padrões de projeto: em uso (Singleton) e planejados (Repository, MVC/DDD, Observer, Factory).
+  - Padrões de projeto: em uso (Singleton) e planejados (Repository, MVC, Observer, Factory).
 
 ## Licença
 
@@ -83,7 +85,9 @@ Uso acadêmico pelos autores. Todos os direitos reservados.
 
 ## Equipe
 
-- Ana Júlia Rossato – Líder, marketing, networking
+_Equipe formada originalmente para o protótipo apresentado na GeniusCom AgroHackathon 2024._
+
+- Ana Júlia Rossato – Marketing, networking
 - Kimberly Fujii Yamaçake – Tesoureira, networking
 - Anna Flávia Guenta Tsurushima – Programadora
 - João Cláudio Fernandes Michelato Colaço – Programador, designer
@@ -92,3 +96,33 @@ Uso acadêmico pelos autores. Todos os direitos reservados.
 ## Instituição
 
 - UENP – Universidade Estadual do Norte do Paraná
+
+## 🤝 Como Contribuir
+
+1. Faça um fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/nova-funcionalidade`)
+3. Commit suas mudanças (`git commit -am 'Adiciona nova funcionalidade'`)
+4. Push para a branch (`git push origin feature/nova-funcionalidade`)
+5. Abra um Pull Request
+
+## 🐛 Reportar Problemas
+
+Encontrou um bug ou tem uma sugestão? Abra uma [issue](https://github.com/J0aoD3v/Guia-Organico/issues) descrevendo:
+
+- Descrição do problema
+- Passos para reproduzir
+- Comportamento esperado
+- Capturas de tela (se aplicável)
+- Ambiente (navegador, versão, sistema operacional)
+
+---
+
+---
+
+**Desenvolvido por:** João Cláudio Fernandes Michelato Colaço
+
+- 📧 Email: jcmichelato8@gmail.com
+- 💼 LinkedIn: [j0aod3v](https://www.linkedin.com/in/j0aod3v/)
+- 🐙 GitHub: [@J0aoD3v](https://github.com/J0aoD3v)
+
+**Guia Orgânico** – Simplificando a agricultura orgânica com tecnologia! 🌱
