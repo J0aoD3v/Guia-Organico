@@ -25,8 +25,13 @@ export default function SignIn() {
       setError("Credenciais inválidas");
       setLoading(false);
     } else {
-      // Redirecionar para página admin ou home
-      router.push("/admin");
+      // Buscar sessão para saber o role
+      const session = await getSession();
+      if (session?.user?.role === "admin") {
+        router.push("/admin");
+      } else {
+        router.push("/perfil");
+      }
     }
   };
 
@@ -116,7 +121,23 @@ export default function SignIn() {
             </p>
             <button
               type="button"
-              onClick={() => signIn("google")}
+              onClick={async () => {
+                setLoading(true);
+                setError("");
+                const result = await signIn("google", { redirect: false });
+                if (result?.error) {
+                  setError("Erro ao autenticar com Google");
+                  setLoading(false);
+                } else {
+                  // Buscar sessão para saber o role
+                  const session = await getSession();
+                  if (session?.user?.role === "admin") {
+                    router.push("/admin");
+                  } else {
+                    router.push("/perfil");
+                  }
+                }
+              }}
               style={{
                 width: "100%",
                 padding: "10px",
