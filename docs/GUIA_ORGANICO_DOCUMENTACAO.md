@@ -81,22 +81,23 @@ Os diagramas a seguir representam a visão pretendida do produto. Servem como re
 ### 4.1 Caso de uso
 
 ```mermaid
-%% Diagrama de Caso de Uso
-%% Sintaxe compatível com GitHub
-%% https://docs.github.com/pt/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams#creating-mermaid-diagrams
-%%
-%% Atores: Produtor, Certificadora, Admin
-%% Casos de uso: Buscar insumo, Solicitar autorização, Aprovar/Rejeitar, Gerenciar produtos, Gerenciar usuários
-usecaseDiagram
-Produtor "Produtor" as Produtor
-Certificadora "Certificadora" as Certificadora
-Admin "Admin" as Admin
+%% Diagrama de Caso de Uso (compatível com GitHub via flowchart)
+flowchart TD
+	Produtor((Produtor))
+	Certificadora((Certificadora))
+	Admin((Admin))
 
-Produtor --> (Buscar insumo)
-Produtor --> (Solicitar autorização)
-Certificadora --> (Aprovar/Rejeitar solicitação)
-Admin --> (Gerenciar produtos)
-Admin --> (Gerenciar usuários)
+	UC_Busca[Buscar insumo]
+	UC_Solicita[Solicitar autorização]
+	UC_Aprova[Aprovar/Rejeitar solicitação]
+	UC_GerenciaProdutos[Gerenciar produtos]
+	UC_GerenciaUsuarios[Gerenciar usuários]
+
+	Produtor --> UC_Busca
+	Produtor --> UC_Solicita
+	Certificadora --> UC_Aprova
+	Admin --> UC_GerenciaProdutos
+	Admin --> UC_GerenciaUsuarios
 ```
 
 ### 4.2 Classes
@@ -104,10 +105,6 @@ Admin --> (Gerenciar usuários)
 ```mermaid
 %% Diagrama de Classes
 classDiagram
-Produtor <|-- Solicitacao
-Certificadora <|-- Produto
-Solicitacao o-- Produto
-
 class Produtor {
 	+id: string
 	+nome: string
@@ -133,6 +130,10 @@ class Solicitacao {
 	+produtorId: string
 	+status: string
 }
+
+Produtor "1" --> "*" Solicitacao : envia
+Solicitacao "*" --> "1" Produto : refere-se a
+Certificadora "1" --> "*" Produto : autoriza
 ```
 
 ### 4.3 Sequência
