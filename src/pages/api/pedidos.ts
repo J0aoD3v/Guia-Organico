@@ -92,9 +92,15 @@ export default async function handler(
         const pedido = {
           email: Array.isArray(fields.email) ? fields.email[0] : fields.email,
           nome: Array.isArray(fields.nome) ? fields.nome[0] : fields.nome,
-          fabricante: Array.isArray(fields.fabricante) ? fields.fabricante[0] : fields.fabricante,
-          categoria: Array.isArray(fields.categoria) ? fields.categoria[0] : fields.categoria,
-          finalidade: Array.isArray(fields.finalidade) ? fields.finalidade[0] : fields.finalidade,
+          fabricante: Array.isArray(fields.fabricante)
+            ? fields.fabricante[0]
+            : fields.fabricante,
+          categoria: Array.isArray(fields.categoria)
+            ? fields.categoria[0]
+            : fields.categoria,
+          finalidade: Array.isArray(fields.finalidade)
+            ? fields.finalidade[0]
+            : fields.finalidade,
           fichaPath,
           bulaPath,
           createdAt: new Date(),
