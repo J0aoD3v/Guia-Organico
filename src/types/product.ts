@@ -6,4 +6,13 @@ export interface Product {
   certificacao?: string;
   classeAgronomica?: string;
   autorizadoPor?: string;
+  finalidade?: string;
+  composicao?: string;
+  modoUso?: string;
+  precaucoes?: string;
+  status?: string;
+  origem?: string;
+  criadoEm?: Date;
+  criadoPor?: string;
+  atualizadoEm?: Date;
 }

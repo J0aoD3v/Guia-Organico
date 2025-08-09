@@ -117,6 +117,33 @@ export default function Home() {
               </button>
             </Link>
 
+            <Link href="/insumos" style={{ 
+              padding: "20px", 
+              border: "1px solid #ddd", 
+              borderRadius: "8px",
+              textDecoration: "none",
+              color: "inherit",
+              cursor: "pointer",
+              transition: "border-color 0.2s"
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = "#059669"}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = "#ddd"}
+            >
+              <h3>🌱 Todos os Insumos</h3>
+              <p>Explore todo o catálogo de insumos com filtros avançados.</p>
+              <button style={{
+                marginTop: "10px",
+                padding: "8px 16px",
+                backgroundColor: "#059669",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer"
+              }}>
+                Ver Todos
+              </button>
+            </Link>
+
             <Link href="/sobre" style={{ 
               padding: "20px", 
               border: "1px solid #ddd", 

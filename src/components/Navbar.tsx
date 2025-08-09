@@ -114,6 +114,29 @@ export default function Navbar() {
           </Link>
           
           <Link 
+            href="/insumos" 
+            style={{ 
+              color: "#111827", 
+              textDecoration: "none",
+              padding: "8px 12px",
+              borderRadius: "4px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              backgroundColor: router.pathname.startsWith("/insumos") && router.pathname !== "/insumos/[id]" ? "#e5e7eb" : "transparent"
+            }}
+            onMouseEnter={(e) => {
+              if (!router.pathname.startsWith("/insumos")) e.currentTarget.style.backgroundColor = "#e5e7eb";
+            }}
+            onMouseLeave={(e) => {
+              if (!router.pathname.startsWith("/insumos")) e.currentTarget.style.backgroundColor = "transparent";
+            }}
+            onClick={() => setOpen(false)}
+          >
+            🌱 Todos os Insumos
+          </Link>
+          
+          <Link 
             href="/pedidos/novo" 
             style={{ 
               color: "#111827", 
