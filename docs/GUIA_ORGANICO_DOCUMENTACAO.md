@@ -1,198 +1,85 @@
-# 📗 Guia Orgânico – Documentação do Projeto
+# 📗 Guia Orgânico — Documentação
 
-## 1. Organização dos Arquivos – Estrutura em Árvore
+Documento enxuto e alinhado ao estado atual do projeto. Itens aspiracionais foram movidos para “Futuro” para evitar ambiguidades.
+
+## 1) Estrutura de Pastas (estado atual)
 
 ```plaintext
 guia-organico/
-│
-├── public/                # Imagens, ícones e arquivos estáticos
+├── docs/
+│   └── GUIA_ORGANICO_DOCUMENTACAO.md
 ├── src/
-│   ├── pages/              # Páginas do Next.js (rotas)
-│   │   ├── index.tsx       # Página inicial
-│   │   ├── admin/          # Painel de administração
-│   │   └── api/            # Rotas de API do Next.js
-│   │       ├── products.ts # CRUD de produtos
-│   │       └── requests.ts # Solicitações de adição
-│   ├── components/         # Componentes reutilizáveis
-│   ├── styles/             # Estilos (CSS/Tailwind)
-│   ├── lib/                # Configurações e conexões (DB, auth)
-│   └── hooks/              # Hooks customizados (ex.: useAuth)
-│
-├── prisma/                 # Schema do banco (se usar Prisma)
-├── tests/                  # Testes automatizados
-├── docs/                   # Documentação do projeto
-│   └── README.md
-│
+│   ├── lib/
+│   │   └── db.ts                 # Conexão MongoDB
+│   └── pages/
+│       ├── index.tsx             # Página inicial
+│       └── api/
+│           └── products.ts       # Listagem de produtos (GET)
+├── next-env.d.ts
 ├── package.json
 ├── tsconfig.json
-├── .env.example
 └── README.md
 ```
 
----
+Observações:
+- Pastas como `public/`, `components/`, `hooks/`, `styles/`, `prisma/` e `tests/` não possuem conteúdo no momento (ou ainda não existem). Crie-as conforme a necessidade durante o desenvolvimento.
+- Existe um arquivo `.env` local (não deve ser versionado). O repositório agora contém um `.env.example` com o nome das variáveis esperadas.
 
-## 2. Engenharia de Software – Normas Técnicas
+## 2) Escopo atual
 
-Este projeto se apoia nas seguintes normas:
+- App Next.js + TypeScript inicializado.
+- Conexão com MongoDB via `mongodb` em `src/lib/db.ts` (padrão Singleton).
+- Rota GET `/api/products` retornando documentos da coleção `products`.
 
-- **ISO/IEC 25010** – Modelo de Qualidade de Software (manutenibilidade, usabilidade, eficiência).
-- **IEEE 830** – Especificação de Requisitos de Software.
-- **ISO/IEC 12207** – Ciclo de vida de software.
-- **ISO 9001** – Gestão de qualidade aplicada ao processo de desenvolvimento.
+## 3) Convenções e padrões (objetivo e direto)
 
----
+- Linguagem: TypeScript.
+- Framework: Next.js 15 (conforme package.json).
+- Banco: MongoDB Atlas (URI via variável de ambiente `MONGODB_URI`).
+- Estilo de código: seguir o padrão do Next.js/TS por enquanto; linters poderão ser adicionados depois.
 
-## 3. Padrões de Projeto (Design Patterns)
+Padrões de projeto em uso agora:
+- Singleton: reuso da conexão MongoDB (`db.ts`).
 
-- **MVC (Model-View-Controller)** – Separação clara de responsabilidades.
-- **Repository Pattern** – Camada de abstração para acesso ao banco de dados.
-- **Observer Pattern** – Atualização em tempo real de solicitações para admin.
-- **Singleton** – Configurações centrais do app (ex.: conexão com banco).
-- **Factory Method** – Criação padronizada de objetos como `Produto` e `Solicitação`.
+Padrões planejados (quando o escopo crescer):
+- Repository (encapsular acesso a dados),
+- MVC/DDD (organização de camadas),
+- Observer (notificações/tempo real),
+- Factory (criação de entidades).
 
----
+## 4) Diagramas (status)
 
-## 4. Diagramas UML
+Os diagramas de casos de uso, classes e sequência originalmente descritos representam a visão futura do produto. Para o escopo atual (MVP inicial), eles são referenciais e não refletem funcionalidades implementadas. Mantidos como “Futuro” para não confundir.
 
-### 4.1 Diagrama de Casos de Uso
+## 5) Roadmap compacto
 
-```mermaid
-usecaseDiagram
-actor Produtor
-actor Certificadora
-actor Admin
+Concluído (MVP inicial):
+- Projeto Next.js com TypeScript.
+- Dependência `mongodb` instalada e conexão implementada.
+- Endpoint GET `/api/products` funcional.
 
-Produtor --> (Buscar insumo)
-Produtor --> (Enviar solicitação de autorização)
-Certificadora --> (Aprovar/Rejeitar solicitação)
-Admin --> (Gerenciar produtos)
-Admin --> (Gerenciar usuários)
+Próximos passos imediatos:
+- Não versionar `.env` (usar `.gitignore`).
+- Definir nome do banco explícito em `client.db('<nome>')` para evitar ambiguidade.
+- Criar `public/` (ativos estáticos) e `components/` conforme a UI evoluir.
+- Definir modelos/validação para `products` e iniciar CRUD completo.
+
+Futuro (após CRUD):
+- Fluxo de solicitações e notificações (email).
+- Painel admin.
+- Testes automatizados e métricas.
+
+## 6) Métricas (após MVP)
+
+Definir metas de desempenho e qualidade depois que o CRUD estiver estável (ex.: tempo de resposta da API, cobertura de testes, LCP).
+
+## 7) Variáveis de ambiente
+
+Criar um arquivo `.env` local com:
+
+```
+MONGODB_URI="mongodb+srv://<usuario>:<senha>@<cluster>/?retryWrites=true&w=majority"
 ```
 
----
+Nunca commitar `.env`. Use o `.env.example` como referência.
 
-### 4.2 Diagrama de Classes
-
-```mermaid
-classDiagram
-class Produtor {
-  +id: string
-  +nome: string
-  +email: string
-  +senha: string
-}
-
-class Certificadora {
-  +id: string
-  +nome: string
-  +email: string
-}
-
-class Produto {
-  +id: string
-  +nome: string
-  +categoria: string
-  +status: string
-}
-
-class Solicitacao {
-  +id: string
-  +produtoId: string
-  +produtorId: string
-  +status: string
-}
-
-Produtor "1" --> "*" Solicitacao
-Solicitacao "*" --> "1" Produto
-Certificadora "1" --> "*" Produto
-```
-
----
-
-### 4.3 Diagrama de Sequência – Fluxo da Solicitação
-
-```mermaid
-sequenceDiagram
-participant Produtor
-participant Frontend
-participant Backend
-participant DB
-participant Admin
-
-Produtor->>Frontend: Preenche solicitação
-Frontend->>Backend: POST /api/requests
-Backend->>DB: Salva solicitação com status "pendente"
-Backend->>Admin: Notificação de nova solicitação
-Admin->>Backend: Aprova/Rejeita solicitação
-Backend->>DB: Atualiza status
-```
-
----
-
-### 4.4 Diagrama de Comunicação – Gerenciamento de Estado
-
-```mermaid
-graph TD
-Frontend <--> Backend
-Backend <--> DB
-Backend --> EmailService
-DB --> Backend
-```
-
----
-
-## 5. Roadmap de Desenvolvimento – Sprints
-
-**Sprint 1 (Semana 1-2)**  
-**Sprint 1 (Semana 1-2) – Checklist Detalhado**
-
-- [x] Inicializar projeto Next.js com TypeScript
-- [x] Criar arquivo `package.json` e instalar dependências principais
-- [x] Criar arquivo `tsconfig.json` para configuração do TypeScript
-- [x] Criar estrutura de pastas:
-  - [x] `src/pages` (com `index.tsx`, `admin/`, `api/`)
-  - [x] `src/components`
-  - [x] `src/styles`
-  - [x] `src/lib`
-  - [x] `src/hooks`
-  - [x] `docs/` (com `GUIA_ORGANICO_DOCUMENTACAO.md`)
-- [x] Criar arquivo `.env` com string de conexão do MongoDB Atlas
-- [x] Criar cluster no MongoDB Atlas e liberar IP local
-- [x] Criar usuário do banco e copiar string de conexão
-- [x] Instalar driver do MongoDB (`npm install mongodb`)
-- [x] Criar arquivo de conexão com o banco (`src/lib/db.ts`)
-- [x] Criar rota de API para listar produtos (`src/pages/api/products.ts`)
-- [x] Testar rota `/api/products` para validar conexão
-- [x] Remover arquivo `.env.example` para segurança
-- [x] Revisar estrutura do projeto conforme documentação
-
-**Próximos passos do Sprint 1:**
-
-- [ ] Criar pasta `public/` para arquivos estáticos
-- [ ] Criar pasta `prisma/` se for usar Prisma
-- [ ] Criar pasta `tests/` para testes automatizados
-- [ ] Implementar CRUD completo de produtos (API e frontend)
-- [ ] Documentar endpoints e exemplos de uso
-
-- Painel admin básico
-
-**Sprint 3 (Semana 5-6)**
-
-- Fluxo de solicitações (frontend + backend)
-- Envio de notificações por e-mail
-
-**Sprint 4 (Semana 7-8)**
-
-- Upload de imagens (Cloudinary)
-- Busca por foto (API de visão computacional)
-- Otimizações de performance e SEO
-
----
-
-## 6. Métricas de Qualidade
-
-- **Tempo de resposta da API**: < 300ms para consultas simples.
-- **Cobertura de testes**: 80%+.
-- **Uptime**: 99,9% no Vercel.
-- **Tempo médio de cadastro**: ≤ 1 minuto para um produto.
-- **LCP (Largest Contentful Paint)**: ≤ 2,5s.
