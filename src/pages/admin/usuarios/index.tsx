@@ -8,46 +8,54 @@ export default function UsuariosAdmin() {
 	const router = useRouter();
 	const [usuarios, setUsuarios] = useState([]);
 	const [loading, setLoading] = useState(true);
+	const [editId, setEditId] = useState(null);
+	const [editData, setEditData] = useState({ limitePedidos: '', pedidosMes: '' });
 
 	useEffect(() => {
 		if (status === 'loading') return;
-		
 		if (!session || session.user?.email !== 'admin@guia-organico.com') {
 			router.push('/admin');
 			return;
 		}
-
-		// Simular carregamento de usuários
-		setTimeout(() => {
-			setUsuarios([
-				{
-					id: 1,
-					nome: 'João Silva',
-					email: 'joao@email.com',
-					role: 'user',
-					createdAt: new Date('2024-01-15'),
-					lastLogin: new Date('2024-08-09')
-				},
-				{
-					id: 2,
-					nome: 'Maria Santos',
-					email: 'maria@email.com',
-					role: 'user',
-					createdAt: new Date('2024-02-20'),
-					lastLogin: new Date('2024-08-08')
-				},
-				{
-					id: 3,
-					nome: 'Admin',
-					email: 'admin@guiaorganico.com',
-					role: 'admin',
-					createdAt: new Date('2024-01-01'),
-					lastLogin: new Date('2024-08-09')
-				}
-			]);
-			setLoading(false);
-		}, 1000);
+		fetchUsuarios();
 	}, [session, status, router]);
+
+	async function fetchUsuarios() {
+		setLoading(true);
+		const res = await fetch('/api/usuarios');
+		const data = await res.json();
+		setUsuarios(data);
+		setLoading(false);
+	}
+
+	async function handleEdit(user) {
+		setEditId(user._id);
+		setEditData({
+			limitePedidos: user.limitePedidos ?? '',
+			pedidosMes: user.pedidosMes ?? ''
+		});
+	}
+
+	async function handleSave() {
+		await fetch('/api/usuarios', {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ id: editId, ...editData })
+		});
+		setEditId(null);
+		setEditData({ limitePedidos: '', pedidosMes: '' });
+		fetchUsuarios();
+	}
+
+	async function handleDelete(id) {
+		if (!window.confirm('Tem certeza que deseja remover este usuário?')) return;
+		await fetch('/api/usuarios', {
+			method: 'DELETE',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ id })
+		});
+		fetchUsuarios();
+	}
 
 	if (status === 'loading' || loading) {
 		return (
@@ -196,12 +204,14 @@ export default function UsuariosAdmin() {
 									<th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Função</th>
 									<th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Cadastro</th>
 									<th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Último Login</th>
+									<th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Limite</th>
+									<th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Solicitações</th>
 									<th style={{ padding: 12, textAlign: 'center', borderBottom: '1px solid #e5e7eb' }}>Ações</th>
 								</tr>
 							</thead>
 							<tbody>
 								{usuarios.map((user) => (
-									<tr key={user.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
+									<tr key={user._id} style={{ borderBottom: '1px solid #e5e7eb' }}>
 										<td style={{ padding: 12 }}>
 											<div style={{ fontWeight: '500', color: '#1e293b' }}>
 												{user.nome}
@@ -225,42 +235,39 @@ export default function UsuariosAdmin() {
 											</span>
 										</td>
 										<td style={{ padding: 12, color: '#64748b', fontSize: '14px' }}>
-											{user.createdAt.toLocaleDateString('pt-BR')}
+											{user.createdAt ? new Date(user.createdAt).toLocaleDateString('pt-BR') : '-'}
 										</td>
 										<td style={{ padding: 12, color: '#64748b', fontSize: '14px' }}>
-											{user.lastLogin.toLocaleDateString('pt-BR')}
+											{user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('pt-BR') : '-'}
+										</td>
+										<td style={{ padding: 12, color: '#64748b', fontSize: '14px' }}>
+											{editId === user._id ? (
+												<input type="number" value={editData.limitePedidos} onChange={e => setEditData({ ...editData, limitePedidos: e.target.value })} style={{ width: 60 }} />
+											) : (
+												user.limitePedidos ?? '-'
+											)}
+										</td>
+										<td style={{ padding: 12, color: '#64748b', fontSize: '14px' }}>
+											{editId === user._id ? (
+												<input type="number" value={editData.pedidosMes} onChange={e => setEditData({ ...editData, pedidosMes: e.target.value })} style={{ width: 60 }} />
+											) : (
+												user.pedidosMes ?? '-'
+											)}
 										</td>
 										<td style={{ padding: 12, textAlign: 'center' }}>
 											<div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-												<button
-													style={{
-														background: '#3b82f6',
-														color: 'white',
-														border: 'none',
-														padding: '4px 8px',
-														borderRadius: '4px',
-														cursor: 'pointer',
-														fontSize: '12px'
-													}}
-													onClick={() => alert(`Editar ${user.nome} (em desenvolvimento)`)}
-												>
-													✏️ Editar
-												</button>
-												{user.role !== 'admin' && (
-													<button
-														style={{
-															background: '#ef4444',
-															color: 'white',
-															border: 'none',
-															padding: '4px 8px',
-															borderRadius: '4px',
-															cursor: 'pointer',
-															fontSize: '12px'
-														}}
-														onClick={() => alert(`Remover ${user.nome} (em desenvolvimento)`)}
-													>
-														🗑️ Remover
-													</button>
+												{editId === user._id ? (
+													<>
+														<button style={{ background: '#10b981', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }} onClick={handleSave}>💾 Salvar</button>
+														<button style={{ background: '#64748b', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }} onClick={() => setEditId(null)}>Cancelar</button>
+													</>
+												) : (
+													<>
+														<button style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }} onClick={() => handleEdit(user)}>✏️ Editar</button>
+														{user.role !== 'admin' && (
+															<button style={{ background: '#ef4444', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }} onClick={() => handleDelete(user._id)}>🗑️ Remover</button>
+														)}
+													</>
 												)}
 											</div>
 										</td>
