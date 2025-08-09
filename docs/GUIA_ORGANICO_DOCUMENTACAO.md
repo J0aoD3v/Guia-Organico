@@ -81,13 +81,19 @@ Os diagramas a seguir representam a visão pretendida do produto. Servem como re
 ### 4.1 Caso de uso
 
 ```mermaid
+%% Diagrama de Caso de Uso
+%% Sintaxe compatível com GitHub
+%% https://docs.github.com/pt/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams#creating-mermaid-diagrams
+%%
+%% Atores: Produtor, Certificadora, Admin
+%% Casos de uso: Buscar insumo, Solicitar autorização, Aprovar/Rejeitar, Gerenciar produtos, Gerenciar usuários
 usecaseDiagram
-actor Produtor
-actor Certificadora
-actor Admin
+Produtor "Produtor" as Produtor
+Certificadora "Certificadora" as Certificadora
+Admin "Admin" as Admin
 
 Produtor --> (Buscar insumo)
-Produtor --> (Enviar solicitação de autorização)
+Produtor --> (Solicitar autorização)
 Certificadora --> (Aprovar/Rejeitar solicitação)
 Admin --> (Gerenciar produtos)
 Admin --> (Gerenciar usuários)
@@ -96,7 +102,12 @@ Admin --> (Gerenciar usuários)
 ### 4.2 Classes
 
 ```mermaid
+%% Diagrama de Classes
 classDiagram
+Produtor <|-- Solicitacao
+Certificadora <|-- Produto
+Solicitacao o-- Produto
+
 class Produtor {
 	+id: string
 	+nome: string
@@ -122,15 +133,12 @@ class Solicitacao {
 	+produtorId: string
 	+status: string
 }
-
-Produtor "1" --> "*" Solicitacao
-Solicitacao "*" --> "1" Produto
-Certificadora "1" --> "*" Produto
 ```
 
 ### 4.3 Sequência
 
 ```mermaid
+%% Diagrama de Sequência
 sequenceDiagram
 participant Produtor
 participant Frontend
@@ -140,9 +148,9 @@ participant Admin
 
 Produtor->>Frontend: Preenche solicitação
 Frontend->>API: POST /api/requests
-API->>DB: Salva solicitação pendente
-API-->>Admin: Notificação
-Admin->>API: Aprovar ou rejeitar
+API->>DB: Salva solicitação (pendente)
+API->>Admin: Notifica admin
+Admin->>API: Aprova ou rejeita
 API->>DB: Atualiza status
 ```
 
