@@ -52,15 +52,6 @@ export default function Home() {
               <h3>📋 Solicitações</h3>
               <p>Solicite autorização de novos insumos diretamente às certificadoras.</p>
             </div>
-
-            <div style={{ 
-              padding: "20px", 
-              border: "1px solid #ddd", 
-              borderRadius: "8px" 
-            }}>
-              <h3>⚙️ Painel Admin</h3>
-              <p>Gerencie produtos, usuários e solicitações (apenas administradores).</p>
-            </div>
           </div>
         </main>
       </div>
