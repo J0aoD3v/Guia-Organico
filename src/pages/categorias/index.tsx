@@ -1,6 +1,8 @@
 import Head from "next/head";
 import Navbar from "../../components/Navbar";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
 const categorias = [
   {
@@ -26,6 +28,35 @@ const categorias = [
 ];
 
 export default function Categorias() {
+  const { data: session } = useSession();
+  const [limitePedidos, setLimitePedidos] = useState<number | null>(null);
+  const [pedidosMes, setPedidosMes] = useState<number | null>(null);
+
+  useEffect(() => {
+    async function fetchDados() {
+      try {
+        const [resPedidos, resLimite] = await Promise.all([
+          fetch(`/api/pedidos?email=${session?.user?.email}`),
+          fetch(`/api/configuracoes`),
+        ]);
+
+        const pedidosData = await resPedidos.json();
+        const limiteData = await resLimite.json();
+
+        setPedidosMes(pedidosData.count ?? 0);
+        setLimitePedidos(limiteData.limitePedidos ?? 5);
+      } catch (err) {
+        console.error("Erro ao buscar dados de pedidos e limite:", err);
+      }
+    }
+
+    if (session) {
+      fetchDados();
+    }
+  }, [session]);
+
+  const isSolicitacaoBloqueada = pedidosMes !== null && limitePedidos !== null && pedidosMes >= limitePedidos;
+
   return (
     <>
       <Head>
@@ -120,17 +151,18 @@ export default function Categorias() {
               🔍 Buscar por texto
             </Link>
             <Link 
-              href="/pedidos/novo"
+              href={isSolicitacaoBloqueada ? "#" : "/pedidos/novo"}
               style={{
                 padding: "8px 16px",
-                backgroundColor: "#10b981",
-                color: "white",
+                backgroundColor: isSolicitacaoBloqueada ? "#d1d5db" : "#10b981",
+                color: isSolicitacaoBloqueada ? "#6b7280" : "white",
                 textDecoration: "none",
                 borderRadius: "6px",
-                fontSize: "14px"
+                fontSize: "14px",
+                cursor: isSolicitacaoBloqueada ? "not-allowed" : "pointer"
               }}
             >
-              📋 Solicitar novo insumo
+              📋 {isSolicitacaoBloqueada ? "Limite Atingido" : "Solicitar novo insumo"}
             </Link>
           </div>
         </div>

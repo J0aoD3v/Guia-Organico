@@ -97,52 +97,6 @@ export default function Navbar() {
           </Link>
           
           <Link 
-            href="/buscar" 
-            style={{ 
-              color: "#111827", 
-              textDecoration: "none",
-              padding: "8px 12px",
-              borderRadius: "4px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              backgroundColor: router.pathname === "/buscar" ? "#e5e7eb" : "transparent"
-            }}
-            onMouseEnter={(e) => {
-              if (router.pathname !== "/buscar") e.currentTarget.style.backgroundColor = "#e5e7eb";
-            }}
-            onMouseLeave={(e) => {
-              if (router.pathname !== "/buscar") e.currentTarget.style.backgroundColor = "transparent";
-            }}
-            onClick={() => setOpen(false)}
-          >
-            🔍 Pesquisar
-          </Link>
-          
-          <Link 
-            href="/categorias" 
-            style={{ 
-              color: "#111827", 
-              textDecoration: "none",
-              padding: "8px 12px",
-              borderRadius: "4px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              backgroundColor: router.pathname.startsWith("/categorias") ? "#e5e7eb" : "transparent"
-            }}
-            onMouseEnter={(e) => {
-              if (!router.pathname.startsWith("/categorias")) e.currentTarget.style.backgroundColor = "#e5e7eb";
-            }}
-            onMouseLeave={(e) => {
-              if (!router.pathname.startsWith("/categorias")) e.currentTarget.style.backgroundColor = "transparent";
-            }}
-            onClick={() => setOpen(false)}
-          >
-            📂 Categorias
-          </Link>
-          
-          <Link 
             href="/insumos" 
             style={{ 
               color: "#111827", 

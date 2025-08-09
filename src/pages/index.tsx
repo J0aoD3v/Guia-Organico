@@ -122,6 +122,11 @@ export default function Home() {
               }}>
                 {isSolicitacaoBloqueada ? "Limite Atingido" : "Solicitar Agora"}
               </button>
+              {isSolicitacaoBloqueada && (
+                <div style={{ fontSize: "12px", color: "#ef4444", marginTop: "8px" }}>
+                  Limite atingido. Próxima liberação: 01/{new Date().getMonth() + 2}/{new Date().getFullYear()} ou entre em contato com o suporte.
+                </div>
+              )}
             </div>
 
             <Link href="/sobre" style={{ 
