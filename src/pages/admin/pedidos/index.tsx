@@ -54,11 +54,12 @@ export default function PedidosAdmin() {
 				// Atualizar a lista de pedidos
 				fetchPedidos();
 			} else {
-				throw new Error('Erro ao aprovar pedido');
+	const errorData = await response.json();
+	throw new Error(errorData?.error || 'Erro ao aprovar pedido');
 			}
 		} catch (error) {
-			console.error('Erro ao aprovar pedido:', error);
-			alert('❌ Erro ao aprovar pedido. Tente novamente.');
+	console.error('Erro ao aprovar pedido:', error);
+	alert(`❌ Erro ao aprovar pedido: ${error.message}`);
 		}
 	};
 

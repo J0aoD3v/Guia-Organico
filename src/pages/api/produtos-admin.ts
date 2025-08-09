@@ -31,12 +31,12 @@ export default async function handler(
           composicao,
           modoUso,
           precaucoes,
-          status = 'ativo'
+          status = "ativo",
         } = req.body;
 
         if (!nome || !fabricante || !categoria) {
-          return res.status(400).json({ 
-            error: "Nome, fabricante e categoria são obrigatórios" 
+          return res.status(400).json({
+            error: "Nome, fabricante e categoria são obrigatórios",
           });
         }
 
@@ -49,21 +49,20 @@ export default async function handler(
           modoUso,
           precaucoes,
           status,
-          origem: 'manual',
+          origem: "manual",
           criadoEm: new Date(),
-          criadoPor: 'admin'
+          criadoPor: "admin",
         };
 
         console.log("🗄️ [API] Inserindo produto no MongoDB:", novoProduto);
         const result = await produtos.insertOne(novoProduto);
         console.log("✅ [API] Produto criado com sucesso");
-        
-        return res.status(201).json({ 
-          ok: true, 
-          id: result.insertedId,
-          message: "Produto criado com sucesso" 
-        });
 
+        return res.status(201).json({
+          ok: true,
+          id: result.insertedId,
+          message: "Produto criado com sucesso",
+        });
       } catch (err) {
         console.error("❌ [API] Erro no POST:", err);
         return res
@@ -76,7 +75,7 @@ export default async function handler(
       console.log("📝 [API] Atualizando produto");
       try {
         const { id, ...updateData } = req.body;
-        
+
         if (!id) {
           return res.status(400).json({ error: "ID é obrigatório" });
         }
@@ -88,18 +87,19 @@ export default async function handler(
 
         await produtos.updateOne(
           { _id: new ObjectId(id) },
-          { 
-            $set: { 
+          {
+            $set: {
               ...updateData,
               atualizadoEm: new Date(),
-              atualizadoPor: 'admin'
-            }
+              atualizadoPor: "admin",
+            },
           }
         );
 
         console.log("✅ [API] Produto atualizado");
-        return res.status(200).json({ ok: true, message: "Produto atualizado com sucesso" });
-
+        return res
+          .status(200)
+          .json({ ok: true, message: "Produto atualizado com sucesso" });
       } catch (err) {
         console.error("❌ [API] Erro no PUT:", err);
         return res
@@ -112,7 +112,7 @@ export default async function handler(
       console.log("📝 [API] Removendo produto");
       try {
         const { id } = req.body;
-        
+
         if (!id) {
           return res.status(400).json({ error: "ID é obrigatório" });
         }
@@ -125,18 +125,19 @@ export default async function handler(
         // Soft delete - apenas marca como inativo
         await produtos.updateOne(
           { _id: new ObjectId(id) },
-          { 
-            $set: { 
-              status: 'inativo',
+          {
+            $set: {
+              status: "inativo",
               removidoEm: new Date(),
-              removidoPor: 'admin'
-            }
+              removidoPor: "admin",
+            },
           }
         );
 
         console.log("✅ [API] Produto removido (soft delete)");
-        return res.status(200).json({ ok: true, message: "Produto removido com sucesso" });
-
+        return res
+          .status(200)
+          .json({ ok: true, message: "Produto removido com sucesso" });
       } catch (err) {
         console.error("❌ [API] Erro no DELETE:", err);
         return res

@@ -52,8 +52,11 @@
   },
   "homepage": "https://github.com/J0aoD3v/Guia-Organico#readme",
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.4",
+    "@testing-library/react": "^16.3.0",
     "@types/node": "^24.2.1",
     "@types/react": "^19.1.9",
+    "jest-environment-jsdom": "^30.0.5",
     "typescript": "^5.9.2"
   }
 }
