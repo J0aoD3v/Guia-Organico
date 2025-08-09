@@ -1,6 +1,7 @@
 # 📗 Guia Orgânico – Documentação do Projeto
 
 ## 1. Organização dos Arquivos – Estrutura em Árvore
+
 ```plaintext
 guia-organico/
 │
@@ -31,6 +32,7 @@ guia-organico/
 ---
 
 ## 2. Engenharia de Software – Normas Técnicas
+
 Este projeto se apoia nas seguintes normas:
 
 - **ISO/IEC 25010** – Modelo de Qualidade de Software (manutenibilidade, usabilidade, eficiência).
@@ -41,6 +43,7 @@ Este projeto se apoia nas seguintes normas:
 ---
 
 ## 3. Padrões de Projeto (Design Patterns)
+
 - **MVC (Model-View-Controller)** – Separação clara de responsabilidades.
 - **Repository Pattern** – Camada de abstração para acesso ao banco de dados.
 - **Observer Pattern** – Atualização em tempo real de solicitações para admin.
@@ -52,6 +55,7 @@ Este projeto se apoia nas seguintes normas:
 ## 4. Diagramas UML
 
 ### 4.1 Diagrama de Casos de Uso
+
 ```mermaid
 usecaseDiagram
 actor Produtor
@@ -68,6 +72,7 @@ Admin --> (Gerenciar usuários)
 ---
 
 ### 4.2 Diagrama de Classes
+
 ```mermaid
 classDiagram
 class Produtor {
@@ -105,6 +110,7 @@ Certificadora "1" --> "*" Produto
 ---
 
 ### 4.3 Diagrama de Sequência – Fluxo da Solicitação
+
 ```mermaid
 sequenceDiagram
 participant Produtor
@@ -124,6 +130,7 @@ Backend->>DB: Atualiza status
 ---
 
 ### 4.4 Diagrama de Comunicação – Gerenciamento de Estado
+
 ```mermaid
 graph TD
 Frontend <--> Backend
@@ -137,27 +144,53 @@ DB --> Backend
 ## 5. Roadmap de Desenvolvimento – Sprints
 
 **Sprint 1 (Semana 1-2)**  
-- Configuração do projeto Next.js  
-- Configuração do banco de dados  
-- Estrutura de pastas e rotas básicas  
+**Sprint 1 (Semana 1-2) – Checklist Detalhado**
 
-**Sprint 2 (Semana 3-4)**  
-- Implementar autenticação (NextAuth)  
-- CRUD de produtos  
-- Painel admin básico  
+- [x] Inicializar projeto Next.js com TypeScript
+- [x] Criar arquivo `package.json` e instalar dependências principais
+- [x] Criar arquivo `tsconfig.json` para configuração do TypeScript
+- [x] Criar estrutura de pastas:
+  - [x] `src/pages` (com `index.tsx`, `admin/`, `api/`)
+  - [x] `src/components`
+  - [x] `src/styles`
+  - [x] `src/lib`
+  - [x] `src/hooks`
+  - [x] `docs/` (com `GUIA_ORGANICO_DOCUMENTACAO.md`)
+- [x] Criar arquivo `.env` com string de conexão do MongoDB Atlas
+- [x] Criar cluster no MongoDB Atlas e liberar IP local
+- [x] Criar usuário do banco e copiar string de conexão
+- [x] Instalar driver do MongoDB (`npm install mongodb`)
+- [x] Criar arquivo de conexão com o banco (`src/lib/db.ts`)
+- [x] Criar rota de API para listar produtos (`src/pages/api/products.ts`)
+- [x] Testar rota `/api/products` para validar conexão
+- [x] Remover arquivo `.env.example` para segurança
+- [x] Revisar estrutura do projeto conforme documentação
 
-**Sprint 3 (Semana 5-6)**  
-- Fluxo de solicitações (frontend + backend)  
-- Envio de notificações por e-mail  
+**Próximos passos do Sprint 1:**
 
-**Sprint 4 (Semana 7-8)**  
-- Upload de imagens (Cloudinary)  
-- Busca por foto (API de visão computacional)  
-- Otimizações de performance e SEO  
+- [ ] Criar pasta `public/` para arquivos estáticos
+- [ ] Criar pasta `prisma/` se for usar Prisma
+- [ ] Criar pasta `tests/` para testes automatizados
+- [ ] Implementar CRUD completo de produtos (API e frontend)
+- [ ] Documentar endpoints e exemplos de uso
+
+- Painel admin básico
+
+**Sprint 3 (Semana 5-6)**
+
+- Fluxo de solicitações (frontend + backend)
+- Envio de notificações por e-mail
+
+**Sprint 4 (Semana 7-8)**
+
+- Upload de imagens (Cloudinary)
+- Busca por foto (API de visão computacional)
+- Otimizações de performance e SEO
 
 ---
 
 ## 6. Métricas de Qualidade
+
 - **Tempo de resposta da API**: < 300ms para consultas simples.
 - **Cobertura de testes**: 80%+.
 - **Uptime**: 99,9% no Vercel.
