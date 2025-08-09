@@ -16,7 +16,7 @@ export default function DetalheInsumo() {
       if (!id || typeof id !== "string") return;
       setLoading(true);
       try {
-        const res = await fetch(`/api/products?id=${encodeURIComponent(id)}`);
+        const res = await fetch(`/api/produtos?id=${encodeURIComponent(id)}`);
         const data = await res.json();
         const found = Array.isArray(data) ? data.find((x: any) => x._id === id) : data;
         setItem(found || null);
