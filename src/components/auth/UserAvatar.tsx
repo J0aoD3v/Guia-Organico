@@ -8,21 +8,30 @@ export default function UserAvatar() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [pedidosMes, setPedidosMes] = useState<number | null>(null);
+  const [limitePedidos, setLimitePedidos] = useState<number | null>(null);
 
-  // Buscar contagem de pedidos do mês
+  // Buscar limite de pedidos e contagem de pedidos do mês
   useEffect(() => {
-    async function fetchPedidosMes() {
+    async function fetchDados() {
       if (session?.user?.email) {
         try {
-          const res = await fetch(`/api/pedidos?email=${session.user.email}`);
-          const data = await res.json();
-          setPedidosMes(data.count ?? 0);
+          const [resPedidos, resLimite] = await Promise.all([
+            fetch(`/api/pedidos?email=${session.user.email}`),
+            fetch(`/api/configuracoes`),
+          ]);
+
+          const pedidosData = await resPedidos.json();
+          const limiteData = await resLimite.json();
+
+          setPedidosMes(pedidosData.count ?? 0);
+          setLimitePedidos(limiteData.limitePedidos ?? 5);
         } catch (err) {
           setPedidosMes(null);
+          setLimitePedidos(null);
         }
       }
     }
-    if (isOpen) fetchPedidosMes();
+    if (isOpen) fetchDados();
   }, [isOpen, session?.user?.email]);
 
   // Fechar dropdown quando clicar fora
@@ -265,8 +274,8 @@ export default function UserAvatar() {
               color: "#6b7280",
               textAlign: "center"
             }}>
-              {pedidosMes !== null
-                ? `${Math.max(5 - pedidosMes, 0)}/5 pedidos mês disponíveis`
+              {pedidosMes !== null && limitePedidos !== null
+                ? `${Math.max(limitePedidos - pedidosMes, 0)}/${limitePedidos} pedidos mês disponíveis`
                 : "Carregando pedidos..."}
             </div>
           </div>
