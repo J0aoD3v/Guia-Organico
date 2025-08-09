@@ -8,10 +8,17 @@ if (!uri) {
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
-if (!global._mongoClientPromise) {
+if (process.env.NODE_ENV === "development") {
+  // Em desenvolvimento, usar uma variável global para reutilizar a conexão
+  if (!global._mongoClientPromise) {
+    client = new MongoClient(uri);
+    global._mongoClientPromise = client.connect();
+  }
+  clientPromise = global._mongoClientPromise;
+} else {
+  // Em produção, sempre criar nova conexão
   client = new MongoClient(uri);
-  global._mongoClientPromise = client.connect();
+  clientPromise = client.connect();
 }
-clientPromise = global._mongoClientPromise;
 
 export default clientPromise;
