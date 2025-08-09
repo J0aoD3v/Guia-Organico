@@ -27,52 +27,91 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const client = await clientPromise;
-  const db = client.db();
-  const pedidos = db.collection("pedidos");
+  console.log("🚀 [API] Iniciando handler pedidos:", req.method);
 
-  if (req.method === "GET") {
-    // Retorna a contagem de pedidos do usuário no mês
-    const { email } = req.query;
-    if (email) {
-      const now = new Date();
-      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      const count = await pedidos.countDocuments({
-        email,
-        createdAt: { $gte: firstDay, $lte: lastDay },
-      });
-      return res.status(200).json({ count });
+  try {
+    const client = await clientPromise;
+    const db = client.db();
+    const pedidos = db.collection("pedidos");
+    console.log("✅ [API] Conectado ao MongoDB");
+
+    if (req.method === "GET") {
+      // Retorna a contagem de pedidos do usuário no mês
+      const { email } = req.query;
+      if (email) {
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        const count = await pedidos.countDocuments({
+          email,
+          createdAt: { $gte: firstDay, $lte: lastDay },
+        });
+        return res.status(200).json({ count });
+      }
+      // Retorna todos os pedidos
+      const all = await pedidos.find({}).sort({ createdAt: -1 }).toArray();
+      return res.status(200).json(all);
     }
-    // Retorna todos os pedidos
-    const all = await pedidos.find({}).sort({ createdAt: -1 }).toArray();
-    return res.status(200).json(all);
-  }
 
-  if (req.method === "POST") {
-    try {
-      const { fields, files } = await parseForm(req);
-      // Salva arquivos localmente (pode ser ajustado para cloud)
-      const fichaPath = files.ficha
-        ? `uploads/${Date.now()}_${files.ficha.originalFilename}`
-        : null;
-      const bulaPath = files.bula
-        ? `uploads/${Date.now()}_${files.bula.originalFilename}`
-        : null;
-      if (files.ficha) fs.copyFileSync(files.ficha.filepath, fichaPath);
-      if (files.bula) fs.copyFileSync(files.bula.filepath, bulaPath);
-      const pedido = {
-        ...fields,
-        fichaPath,
-        bulaPath,
-        createdAt: new Date(),
-      };
-      await pedidos.insertOne(pedido);
-      return res.status(201).json({ ok: true });
-    } catch (err) {
-      return res.status(500).json({ error: "Erro ao salvar pedido" });
+    if (req.method === "POST") {
+      console.log("📝 [API] Processando POST de pedido");
+      try {
+        console.log("📄 [API] Fazendo parse do formulário...");
+        const { fields, files } = await parseForm(req);
+        console.log("📄 [API] Formulário parseado:", {
+          fields: Object.keys(fields),
+          files: Object.keys(files),
+        });
+        console.log("📄 [API] Detalhes dos arquivos:", files);
+
+        // Salva arquivos localmente (pode ser ajustado para cloud)
+        const fichaFile = Array.isArray(files.ficha)
+          ? files.ficha[0]
+          : files.ficha;
+        const bulaFile = Array.isArray(files.bula) ? files.bula[0] : files.bula;
+
+        const fichaPath = fichaFile
+          ? `uploads/${Date.now()}_${
+              fichaFile.originalFilename || fichaFile.newFilename
+            }`
+          : null;
+        const bulaPath = bulaFile
+          ? `uploads/${Date.now()}_${
+              bulaFile.originalFilename || bulaFile.newFilename
+            }`
+          : null;
+
+        console.log("💾 [API] Salvando arquivos:", { fichaPath, bulaPath });
+        if (fichaFile && fichaFile.filepath) {
+          fs.copyFileSync(fichaFile.filepath, fichaPath);
+        }
+        if (bulaFile && bulaFile.filepath) {
+          fs.copyFileSync(bulaFile.filepath, bulaPath);
+        }
+
+        const pedido = {
+          ...fields,
+          fichaPath,
+          bulaPath,
+          createdAt: new Date(),
+        };
+        console.log("🗄️ [API] Inserindo no MongoDB:", pedido);
+        await pedidos.insertOne(pedido);
+        console.log("✅ [API] Pedido salvo com sucesso");
+        return res.status(201).json({ ok: true });
+      } catch (err) {
+        console.error("❌ [API] Erro no POST:", err);
+        return res
+          .status(500)
+          .json({ error: "Erro ao salvar pedido", details: err.message });
+      }
     }
-  }
 
-  res.status(405).end();
+    res.status(405).end();
+  } catch (err) {
+    console.error("❌ [API] Erro geral:", err);
+    return res
+      .status(500)
+      .json({ error: "Erro interno do servidor", details: err.message });
+  }
 }
