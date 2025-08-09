@@ -33,7 +33,7 @@ export default function ProdutosAdmin() {
 	const fetchProdutos = async () => {
 		try {
 			setLoading(true);
-			const response = await fetch('/api/produtos-admin');
+			const response = await fetch('/api/produtos');
 			const data = await response.json();
 			setProdutos(data);
 		} catch (error) {
@@ -52,7 +52,7 @@ export default function ProdutosAdmin() {
 		}
 
 		try {
-			const response = await fetch('/api/produtos-admin', {
+			const response = await fetch('/api/produtos', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -84,13 +84,12 @@ export default function ProdutosAdmin() {
 
 	const toggleStatus = async (produtoId: string, novoStatus: string) => {
 		try {
-			const response = await fetch('/api/produtos-admin', {
+			const response = await fetch(`/api/produtos?id=${produtoId}`, {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
-					id: produtoId,
 					status: novoStatus
 				})
 			});

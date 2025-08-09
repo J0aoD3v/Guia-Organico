@@ -16,7 +16,7 @@ export default function CategoriaLista() {
       if (!slug || typeof slug !== "string") return;
       setLoading(true);
       try {
-        const res = await fetch(`/api/products?categoria=${encodeURIComponent(slug)}`);
+        const res = await fetch(`/api/produtos?categoria=${encodeURIComponent(slug)}`);
         const data = await res.json();
         setItems(data || []);
       } finally {

@@ -17,7 +17,7 @@ export default function Resultados() {
       try {
         const params = new URLSearchParams();
         if (typeof q === "string" && q.trim()) params.set("q", q);
-        const res = await fetch(`/api/products?${params.toString()}`);
+        const res = await fetch(`/api/produtos?${params.toString()}`);
         const data = await res.json();
         setItems(data || []);
       } finally {
