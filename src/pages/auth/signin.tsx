@@ -124,7 +124,7 @@ export default function SignIn() {
               onClick={() => {
                 setLoading(true);
                 setError("");
-                signIn("google", { callbackUrl: "/perfil" });
+                signIn("google", { callbackUrl: "/" });
               }}
               style={{
                 width: "100%",
