@@ -367,7 +367,12 @@ export default function AdminPanel() {
 													</td>
 													<td style={{ padding: 10 }}>
 														<div>
-															<div style={{ fontWeight: '500' }}>{p.email?.split('@')[0] || '-'}</div>
+															<div style={{ fontWeight: '500' }}>
+																{(typeof p.email === 'string' && p.email.includes('@')) 
+																	? p.email.split('@')[0] 
+																	: p.email || '-'
+																}
+															</div>
 															<div style={{ fontSize: '12px', color: '#6b7280' }}>{p.email || '-'}</div>
 														</div>
 													</td>
