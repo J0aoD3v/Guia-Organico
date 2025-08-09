@@ -73,20 +73,36 @@ export default async function handler(
       try {
         const { fields, files } = await parseForm(req);
 
-        const fichaFile = Array.isArray(files.ficha) ? files.ficha[0] : files.ficha;
+        const fichaFile = Array.isArray(files.ficha)
+          ? files.ficha[0]
+          : files.ficha;
         const bulaFile = Array.isArray(files.bula) ? files.bula[0] : files.bula;
 
         const pedido = {
           email: Array.isArray(fields.email) ? fields.email[0] : fields.email,
           nome: Array.isArray(fields.nome) ? fields.nome[0] : fields.nome,
-          fabricante: Array.isArray(fields.fabricante) ? fields.fabricante[0] : fields.fabricante,
-          categoria: Array.isArray(fields.categoria) ? fields.categoria[0] : fields.categoria,
-          finalidade: Array.isArray(fields.finalidade) ? fields.finalidade[0] : fields.finalidade,
+          fabricante: Array.isArray(fields.fabricante)
+            ? fields.fabricante[0]
+            : fields.fabricante,
+          categoria: Array.isArray(fields.categoria)
+            ? fields.categoria[0]
+            : fields.categoria,
+          finalidade: Array.isArray(fields.finalidade)
+            ? fields.finalidade[0]
+            : fields.finalidade,
           fichaInfo: fichaFile
-            ? { nome: fichaFile.originalFilename || fichaFile.newFilename, tamanho: fichaFile.size, tipo: fichaFile.mimetype }
+            ? {
+                nome: fichaFile.originalFilename || fichaFile.newFilename,
+                tamanho: fichaFile.size,
+                tipo: fichaFile.mimetype,
+              }
             : null,
           bulaInfo: bulaFile
-            ? { nome: bulaFile.originalFilename || bulaFile.newFilename, tamanho: bulaFile.size, tipo: bulaFile.mimetype }
+            ? {
+                nome: bulaFile.originalFilename || bulaFile.newFilename,
+                tamanho: bulaFile.size,
+                tipo: bulaFile.mimetype,
+              }
             : null,
           status: "pendente",
           createdAt: new Date(),
@@ -96,7 +112,10 @@ export default async function handler(
         console.log("💾 [API] Salvando no banco de dados...");
 
         const result = await pedidos.insertOne(pedido);
-        console.log("✅ [API] Pedido salvo com sucesso. ID:", result.insertedId);
+        console.log(
+          "✅ [API] Pedido salvo com sucesso. ID:",
+          result.insertedId
+        );
 
         return res.status(201).json({ ok: true, id: result.insertedId });
       } catch (err) {
@@ -153,10 +172,20 @@ export default async function handler(
             .status(200)
             .json({ ok: true, message: "Pedido aprovado com sucesso" });
         } else if (action === "rejeitar") {
-          await pedidos.deleteOne({ _id: new ObjectId(id) });
+          await pedidos.updateOne(
+            { _id: new ObjectId(id) },
+            {
+              $set: {
+                status: "rejeitado",
+                rejeitadoEm: new Date(),
+                rejeitadoPor: "admin",
+                motivoRejeicao: motivo || null,
+              },
+            }
+          );
           return res
             .status(200)
-            .json({ ok: true, message: "Pedido rejeitado e excluído" });
+            .json({ ok: true, message: "Pedido rejeitado com sucesso" });
         }
 
         return res.status(400).json({ error: "Ação inválida" });
