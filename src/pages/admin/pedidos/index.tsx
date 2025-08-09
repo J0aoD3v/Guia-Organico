@@ -12,7 +12,7 @@ export default function PedidosAdmin() {
 	useEffect(() => {
 		if (status === 'loading') return;
 		
-		if (!session || session.user?.email !== 'admin@guiaorganico.com') {
+		if (!session || session.user?.email !== 'admin@guia-organico.com') {
 			router.push('/admin');
 			return;
 		}
@@ -32,14 +32,63 @@ export default function PedidosAdmin() {
 		}
 	};
 
-	const aprovarPedido = (pedidoId: string, nomeProduto: string) => {
-		alert(`Pedido de "${nomeProduto}" aprovado com sucesso!\n(Funcionalidade em desenvolvimento)`);
+	const aprovarPedido = async (pedidoId: string, nomeProduto: string) => {
+		if (!confirm(`Deseja aprovar o pedido de "${nomeProduto}"?\n\nIsso adicionará o produto ao catálogo oficial.`)) {
+			return;
+		}
+
+		try {
+			const response = await fetch('/api/pedidos', {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					id: pedidoId,
+					action: 'aprovar'
+				})
+			});
+
+			if (response.ok) {
+				alert(`✅ Pedido de "${nomeProduto}" aprovado com sucesso!\n\nO produto foi adicionado ao catálogo oficial.`);
+				// Atualizar a lista de pedidos
+				fetchPedidos();
+			} else {
+				throw new Error('Erro ao aprovar pedido');
+			}
+		} catch (error) {
+			console.error('Erro ao aprovar pedido:', error);
+			alert('❌ Erro ao aprovar pedido. Tente novamente.');
+		}
 	};
 
-	const rejeitarPedido = (pedidoId: string, nomeProduto: string) => {
+	const rejeitarPedido = async (pedidoId: string, nomeProduto: string) => {
 		const motivo = prompt(`Por que rejeitar o pedido de "${nomeProduto}"?`);
-		if (motivo) {
-			alert(`Pedido rejeitado. Motivo: ${motivo}\n(Funcionalidade em desenvolvimento)`);
+		if (!motivo) return;
+
+		try {
+			const response = await fetch('/api/pedidos', {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					id: pedidoId,
+					action: 'rejeitar',
+					motivo: motivo
+				})
+			});
+
+			if (response.ok) {
+				alert(`❌ Pedido de "${nomeProduto}" rejeitado.\n\nMotivo: ${motivo}`);
+				// Atualizar a lista de pedidos
+				fetchPedidos();
+			} else {
+				throw new Error('Erro ao rejeitar pedido');
+			}
+		} catch (error) {
+			console.error('Erro ao rejeitar pedido:', error);
+			alert('❌ Erro ao rejeitar pedido. Tente novamente.');
 		}
 	};
 
@@ -125,7 +174,7 @@ export default function PedidosAdmin() {
 						border: '1px solid #e5e7eb'
 					}}>
 						<h3 style={{ color: '#f59e0b', margin: 0, fontSize: '24px' }}>
-							{pedidos.length}
+							{pedidos.filter(p => p.status === 'pendente' || !p.status).length}
 						</h3>
 						<p style={{ color: '#64748b', margin: '4px 0 0 0', fontSize: '14px' }}>
 							Pendentes
@@ -140,7 +189,7 @@ export default function PedidosAdmin() {
 						border: '1px solid #e5e7eb'
 					}}>
 						<h3 style={{ color: '#10b981', margin: 0, fontSize: '24px' }}>
-							0
+							{pedidos.filter(p => p.status === 'aprovado').length}
 						</h3>
 						<p style={{ color: '#64748b', margin: '4px 0 0 0', fontSize: '14px' }}>
 							Aprovados
@@ -155,7 +204,7 @@ export default function PedidosAdmin() {
 						border: '1px solid #e5e7eb'
 					}}>
 						<h3 style={{ color: '#ef4444', margin: 0, fontSize: '24px' }}>
-							0
+							{pedidos.filter(p => p.status === 'rejeitado').length}
 						</h3>
 						<p style={{ color: '#64748b', margin: '4px 0 0 0', fontSize: '14px' }}>
 							Rejeitados
@@ -248,6 +297,7 @@ export default function PedidosAdmin() {
 										<th style={{ padding: 12, borderBottom: '1px solid #e5e7eb', textAlign: 'left' }}>Usuário</th>
 										<th style={{ padding: 12, borderBottom: '1px solid #e5e7eb', textAlign: 'left' }}>Produto</th>
 										<th style={{ padding: 12, borderBottom: '1px solid #e5e7eb', textAlign: 'left' }}>Categoria</th>
+										<th style={{ padding: 12, borderBottom: '1px solid #e5e7eb', textAlign: 'left' }}>Status</th>
 										<th style={{ padding: 12, borderBottom: '1px solid #e5e7eb', textAlign: 'left' }}>Finalidade</th>
 										<th style={{ padding: 12, borderBottom: '1px solid #e5e7eb', textAlign: 'center' }}>Anexos</th>
 										<th style={{ padding: 12, borderBottom: '1px solid #e5e7eb', textAlign: 'center' }}>Ações</th>

@@ -101,15 +101,18 @@ export default function AdminPanel() {
 								<p style={{ margin: '0 0 16px 0', color: '#64748b', fontSize: '14px' }}>
 									Adicionar, editar e remover insumos do catálogo
 								</p>
-								<button style={{
-									backgroundColor: '#3b82f6',
-									color: 'white',
-									border: 'none',
-									padding: '8px 16px',
-									borderRadius: '6px',
-									cursor: 'pointer',
-									fontSize: '14px'
-								}}>
+								<button 
+									onClick={() => router.push('/admin/produtos')}
+									style={{
+										backgroundColor: '#3b82f6',
+										color: 'white',
+										border: 'none',
+										padding: '8px 16px',
+										borderRadius: '6px',
+										cursor: 'pointer',
+										fontSize: '14px'
+									}}
+								>
 									Acessar
 								</button>
 							</div>
@@ -189,35 +192,6 @@ export default function AdminPanel() {
 									onClick={() => router.push('/admin/relatorios')}
 									style={{
 										backgroundColor: '#f59e0b',
-										color: 'white',
-										border: 'none',
-										padding: '8px 16px',
-										borderRadius: '6px',
-										cursor: 'pointer',
-										fontSize: '14px'
-									}}
-								>
-									Acessar
-								</button>
-							</div>
-
-							{/* Gestão de Produtos */}
-							<div style={{ 
-								backgroundColor: '#f8fafc',
-								padding: 20,
-								borderRadius: 8,
-								border: '1px solid #e2e8f0'
-							}}>
-								<h3 style={{ margin: '0 0 12px 0', color: '#1e293b' }}>
-									🌱 Gestão de Produtos
-								</h3>
-								<p style={{ margin: '0 0 16px 0', color: '#64748b', fontSize: '14px' }}>
-									Adicionar, editar e gerenciar produtos orgânicos
-								</p>
-								<button 
-									onClick={() => router.push('/admin/produtos')}
-									style={{
-										backgroundColor: '#10b981',
 										color: 'white',
 										border: 'none',
 										padding: '8px 16px',

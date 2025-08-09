@@ -14,7 +14,7 @@ export default function ConfiguracoesAdmin() {
 	useEffect(() => {
 		if (status === 'loading') return;
 		
-		if (!session || session.user?.email !== 'admin@guiaorganico.com') {
+		if (!session || session.user?.email !== 'admin@guia-organico.com') {
 			router.push('/admin');
 			return;
 		}

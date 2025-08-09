@@ -103,6 +103,7 @@ export default async function handler(
             : fields.finalidade,
           fichaPath,
           bulaPath,
+          status: 'pendente',
           createdAt: new Date(),
         };
         console.log("🗄️ [API] Inserindo no MongoDB:", pedido);
@@ -114,6 +115,80 @@ export default async function handler(
         return res
           .status(500)
           .json({ error: "Erro ao salvar pedido", details: err.message });
+      }
+    }
+
+    if (req.method === "PUT") {
+      console.log("📝 [API] Processando PUT de pedido");
+      try {
+        const { id, action, motivo } = req.body;
+        
+        if (!id || !action) {
+          return res.status(400).json({ error: "ID e ação são obrigatórios" });
+        }
+
+        const pedido = await pedidos.findOne({ _id: new ObjectId(id) });
+        if (!pedido) {
+          return res.status(404).json({ error: "Pedido não encontrado" });
+        }
+
+        if (action === 'aprovar') {
+          // Atualizar status do pedido
+          await pedidos.updateOne(
+            { _id: new ObjectId(id) },
+            { 
+              $set: { 
+                status: 'aprovado',
+                aprovadoEm: new Date(),
+                aprovadoPor: 'admin'
+              }
+            }
+          );
+
+          // Adicionar produto ao catálogo oficial
+          const produtos = db.collection("produtos");
+          await produtos.insertOne({
+            nome: pedido.nome,
+            fabricante: pedido.fabricante,
+            categoria: pedido.categoria,
+            finalidade: pedido.finalidade,
+            fichaPath: pedido.fichaPath,
+            bulaPath: pedido.bulaPath,
+            status: 'ativo',
+            origem: 'pedido_aprovado',
+            pedidoId: id,
+            criadoEm: new Date(),
+            criadoPor: 'admin'
+          });
+
+          console.log("✅ [API] Pedido aprovado e produto adicionado ao catálogo");
+          return res.status(200).json({ ok: true, message: "Pedido aprovado com sucesso" });
+
+        } else if (action === 'rejeitar') {
+          // Atualizar status do pedido
+          await pedidos.updateOne(
+            { _id: new ObjectId(id) },
+            { 
+              $set: { 
+                status: 'rejeitado',
+                rejeitadoEm: new Date(),
+                rejeitadoPor: 'admin',
+                motivoRejeicao: motivo
+              }
+            }
+          );
+
+          console.log("✅ [API] Pedido rejeitado");
+          return res.status(200).json({ ok: true, message: "Pedido rejeitado" });
+        }
+
+        return res.status(400).json({ error: "Ação inválida" });
+
+      } catch (err) {
+        console.error("❌ [API] Erro no PUT:", err);
+        return res
+          .status(500)
+          .json({ error: "Erro ao atualizar pedido", details: err.message });
       }
     }
 
