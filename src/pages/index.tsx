@@ -1,5 +1,5 @@
 import Head from "next/head";
-import AuthButton from "../components/auth/AuthButton";
+import UserAvatar from "../components/auth/UserAvatar";
 
 export default function Home() {
   return (
@@ -19,7 +19,7 @@ export default function Home() {
           paddingBottom: "20px"
         }}>
           <h1>🌱 Guia Orgânico</h1>
-          <AuthButton />
+          <UserAvatar />
         </header>
 
         <main>

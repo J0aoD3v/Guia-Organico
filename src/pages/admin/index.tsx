@@ -1,10 +1,12 @@
 import Head from "next/head";
 import { useSession } from "next-auth/react";
 import ProtectedRoute from "../../components/auth/ProtectedRoute";
-import AuthButton from "../../components/auth/AuthButton";
+import UserAvatar from "../../components/auth/UserAvatar";
+import { useRouter } from "next/router";
 
 export default function AdminPanel() {
   const { data: session } = useSession();
+  const router = useRouter();
 
   return (
     <ProtectedRoute requiredRole="admin">
@@ -21,8 +23,13 @@ export default function AdminPanel() {
           borderBottom: "1px solid #ddd",
           paddingBottom: "20px"
         }}>
-          <h1>🌱 Guia Orgânico - Admin</h1>
-          <AuthButton />
+          <h1 
+            onClick={() => router.push("/")}
+            style={{ cursor: "pointer" }}
+          >
+            🌱 Guia Orgânico - Admin
+          </h1>
+          <UserAvatar />
         </header>
 
         <main>

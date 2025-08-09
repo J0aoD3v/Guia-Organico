@@ -97,6 +97,14 @@ export default NextAuth({
       }
       return true;
     },
+    async redirect({ url, baseUrl }) {
+      // Se é uma URL relativa, adiciona o baseUrl
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // Se a URL já contém o baseUrl, retorna como está
+      else if (new URL(url).origin === baseUrl) return url;
+      // Caso contrário, redireciona para a home
+      return baseUrl;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role;
