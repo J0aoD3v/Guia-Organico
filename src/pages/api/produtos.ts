@@ -18,14 +18,14 @@ export default async function handler(
       const { q, categoria, id } = req.query;
 
       const filter: any = {};
-      
+
       // Filtrar apenas produtos ativos para consultas públicas
       // Se vier de admin, não filtrar por status
-      const isAdminRequest = req.headers.referer?.includes('/admin');
+      const isAdminRequest = req.headers.referer?.includes("/admin");
       if (!isAdminRequest) {
-        filter.status = 'ativo';
+        filter.status = "ativo";
       }
-      
+
       if (q && typeof q === "string" && q.trim()) {
         const regex = new RegExp(q.trim(), "i");
         filter.$or = [
@@ -38,7 +38,7 @@ export default async function handler(
           { composicao: regex },
         ];
       }
-      
+
       if (categoria && typeof categoria === "string" && categoria.trim()) {
         filter.categoria = categoria.trim();
       }
@@ -59,7 +59,7 @@ export default async function handler(
         .find(filter)
         .sort({ criadoEm: -1 })
         .toArray();
-        
+
       return res.status(200).json(result);
     }
 
@@ -151,7 +151,9 @@ export default async function handler(
         }
 
         console.log("✅ [API] Produto atualizado com sucesso");
-        return res.status(200).json({ message: "Produto atualizado com sucesso" });
+        return res
+          .status(200)
+          .json({ message: "Produto atualizado com sucesso" });
       } catch (error) {
         console.error("❌ [API] Erro ao atualizar produto:", error);
         return res.status(500).json({ error: "Erro interno do servidor" });
@@ -169,7 +171,9 @@ export default async function handler(
 
         let result;
         if (ObjectId.isValid(id as string)) {
-          result = await produtos.deleteOne({ _id: new ObjectId(id as string) });
+          result = await produtos.deleteOne({
+            _id: new ObjectId(id as string),
+          });
         } else {
           result = await produtos.deleteOne({ _id: id as any });
         }
@@ -179,7 +183,9 @@ export default async function handler(
         }
 
         console.log("✅ [API] Produto deletado com sucesso");
-        return res.status(200).json({ message: "Produto deletado com sucesso" });
+        return res
+          .status(200)
+          .json({ message: "Produto deletado com sucesso" });
       } catch (error) {
         console.error("❌ [API] Erro ao deletar produto:", error);
         return res.status(500).json({ error: "Erro interno do servidor" });
@@ -189,6 +195,8 @@ export default async function handler(
     return res.status(405).json({ error: "Método não permitido" });
   } catch (error) {
     console.error("❌ [API] Erro geral na API produtos:", error);
-    res.status(500).json({ error: "Erro ao conectar ao banco ou processar requisição." });
+    res
+      .status(500)
+      .json({ error: "Erro ao conectar ao banco ou processar requisição." });
   }
 }
