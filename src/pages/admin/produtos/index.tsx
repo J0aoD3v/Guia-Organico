@@ -9,6 +9,8 @@ export default function ProdutosAdmin() {
 	const [produtos, setProdutos] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [showAddForm, setShowAddForm] = useState(false);
+	const [showEditForm, setShowEditForm] = useState(false);
+	const [editingProduct, setEditingProduct] = useState(null);
 	const [formData, setFormData] = useState({
 		nome: '',
 		fabricante: '',
@@ -16,7 +18,9 @@ export default function ProdutosAdmin() {
 		finalidade: '',
 		composicao: '',
 		modoUso: '',
-		precaucoes: ''
+		precaucoes: '',
+		certificacao: '',
+		classeAgronomica: ''
 	});
 
 	useEffect(() => {
@@ -63,15 +67,7 @@ export default function ProdutosAdmin() {
 			if (response.ok) {
 				alert('✅ Produto adicionado com sucesso!');
 				setShowAddForm(false);
-				setFormData({
-					nome: '',
-					fabricante: '',
-					categoria: '',
-					finalidade: '',
-					composicao: '',
-					modoUso: '',
-					precaucoes: ''
-				});
+				resetForm();
 				fetchProdutos();
 			} else {
 				throw new Error('Erro ao adicionar produto');
@@ -104,6 +100,96 @@ export default function ProdutosAdmin() {
 			console.error('Erro ao atualizar status:', error);
 			alert('❌ Erro ao atualizar status. Tente novamente.');
 		}
+	};
+
+	const handleEditProduct = (produto: any) => {
+		setEditingProduct(produto);
+		setFormData({
+			nome: produto.nome || '',
+			fabricante: produto.fabricante || '',
+			categoria: produto.categoria || '',
+			finalidade: produto.finalidade || '',
+			composicao: produto.composicao || '',
+			modoUso: produto.modoUso || '',
+			precaucoes: produto.precaucoes || '',
+			certificacao: produto.certificacao || '',
+			classeAgronomica: produto.classeAgronomica || ''
+		});
+		setShowEditForm(true);
+	};
+
+	const handleUpdateProduct = async (e: React.FormEvent) => {
+		e.preventDefault();
+		
+		if (!formData.nome || !formData.fabricante || !formData.categoria) {
+			alert('Nome, fabricante e categoria são obrigatórios!');
+			return;
+		}
+
+		try {
+			const response = await fetch(`/api/produtos?id=${editingProduct._id}`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(formData)
+			});
+
+			if (response.ok) {
+				alert('✅ Produto atualizado com sucesso!');
+				setShowEditForm(false);
+				setEditingProduct(null);
+				resetForm();
+				fetchProdutos();
+			} else {
+				throw new Error('Erro ao atualizar produto');
+			}
+		} catch (error) {
+			console.error('Erro ao atualizar produto:', error);
+			alert('❌ Erro ao atualizar produto. Tente novamente.');
+		}
+	};
+
+	const handleDeleteProduct = async (produtoId: string, nomeProduto: string) => {
+		if (!confirm(`Tem certeza que deseja deletar o produto "${nomeProduto}"?\n\nEsta ação não pode ser desfeita.`)) {
+			return;
+		}
+
+		try {
+			const response = await fetch(`/api/produtos?id=${produtoId}`, {
+				method: 'DELETE'
+			});
+
+			if (response.ok) {
+				alert('✅ Produto deletado com sucesso!');
+				fetchProdutos();
+			} else {
+				throw new Error('Erro ao deletar produto');
+			}
+		} catch (error) {
+			console.error('Erro ao deletar produto:', error);
+			alert('❌ Erro ao deletar produto. Tente novamente.');
+		}
+	};
+
+	const resetForm = () => {
+		setFormData({
+			nome: '',
+			fabricante: '',
+			categoria: '',
+			finalidade: '',
+			composicao: '',
+			modoUso: '',
+			precaucoes: '',
+			certificacao: '',
+			classeAgronomica: ''
+		});
+	};
+
+	const closeEditForm = () => {
+		setShowEditForm(false);
+		setEditingProduct(null);
+		resetForm();
 	};
 
 	if (status === 'loading' || loading) {
@@ -303,12 +389,50 @@ export default function ProdutosAdmin() {
 										required
 									>
 										<option value="">Selecione uma categoria</option>
-										<option value="Fertilizante">Fertilizante</option>
-										<option value="Defensivo">Defensivo</option>
-										<option value="Condicionador">Condicionador</option>
-										<option value="Biofertilizante">Biofertilizante</option>
-										<option value="Corretor">Corretor</option>
+										<option value="Fertilizantes">Fertilizantes</option>
+										<option value="Defensivos">Defensivos</option>
+										<option value="Sementes">Sementes</option>
+										<option value="Inoculantes">Inoculantes</option>
+										<option value="Corretivos">Corretivos</option>
+										<option value="Condicionadores">Condicionadores</option>
+										<option value="Bioestimulantes">Bioestimulantes</option>
 									</select>
+								</div>
+
+								<div style={{ marginBottom: '16px' }}>
+									<label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+										Certificação
+									</label>
+									<input
+										type="text"
+										value={formData.certificacao}
+										onChange={(e) => setFormData({...formData, certificacao: e.target.value})}
+										style={{
+											width: '100%',
+											padding: '8px',
+											border: '1px solid #d1d5db',
+											borderRadius: '4px'
+										}}
+										placeholder="Ex: IBD, Ecocert, etc."
+									/>
+								</div>
+
+								<div style={{ marginBottom: '16px' }}>
+									<label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+										Classe Agronômica
+									</label>
+									<input
+										type="text"
+										value={formData.classeAgronomica}
+										onChange={(e) => setFormData({...formData, classeAgronomica: e.target.value})}
+										style={{
+											width: '100%',
+											padding: '8px',
+											border: '1px solid #d1d5db',
+											borderRadius: '4px'
+										}}
+										placeholder="Ex: Fertilizante orgânico simples"
+									/>
 								</div>
 
 								<div style={{ marginBottom: '16px' }}>
@@ -325,14 +449,71 @@ export default function ProdutosAdmin() {
 											borderRadius: '4px',
 											minHeight: '60px'
 										}}
-										placeholder="Para que serve este produto..."
+										placeholder="Descreva a finalidade do produto..."
+									/>
+								</div>
+
+								<div style={{ marginBottom: '16px' }}>
+									<label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+										Composição
+									</label>
+									<textarea
+										value={formData.composicao}
+										onChange={(e) => setFormData({...formData, composicao: e.target.value})}
+										style={{
+											width: '100%',
+											padding: '8px',
+											border: '1px solid #d1d5db',
+											borderRadius: '4px',
+											minHeight: '60px'
+										}}
+										placeholder="Descreva a composição do produto..."
+									/>
+								</div>
+
+								<div style={{ marginBottom: '16px' }}>
+									<label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+										Modo de Uso
+									</label>
+									<textarea
+										value={formData.modoUso}
+										onChange={(e) => setFormData({...formData, modoUso: e.target.value})}
+										style={{
+											width: '100%',
+											padding: '8px',
+											border: '1px solid #d1d5db',
+											borderRadius: '4px',
+											minHeight: '60px'
+										}}
+										placeholder="Descreva como usar o produto..."
+									/>
+								</div>
+
+								<div style={{ marginBottom: '16px' }}>
+									<label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+										Precauções
+									</label>
+									<textarea
+										value={formData.precaucoes}
+										onChange={(e) => setFormData({...formData, precaucoes: e.target.value})}
+										style={{
+											width: '100%',
+											padding: '8px',
+											border: '1px solid #d1d5db',
+											borderRadius: '4px',
+											minHeight: '60px'
+										}}
+										placeholder="Precauções de uso..."
 									/>
 								</div>
 
 								<div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
 									<button
 										type="button"
-										onClick={() => setShowAddForm(false)}
+										onClick={() => {
+											setShowAddForm(false);
+											resetForm();
+										}}
 										style={{
 											background: '#6b7280',
 											color: 'white',
@@ -356,6 +537,235 @@ export default function ProdutosAdmin() {
 										}}
 									>
 										Adicionar
+									</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				)}
+
+				{/* Formulário de Editar Produto */}
+				{showEditForm && (
+					<div style={{
+						position: 'fixed',
+						top: 0,
+						left: 0,
+						right: 0,
+						bottom: 0,
+						backgroundColor: 'rgba(0,0,0,0.5)',
+						display: 'flex',
+						justifyContent: 'center',
+						alignItems: 'center',
+						zIndex: 1000
+					}}>
+						<div style={{
+							backgroundColor: 'white',
+							padding: '24px',
+							borderRadius: '8px',
+							maxWidth: '500px',
+							width: '90%',
+							maxHeight: '80vh',
+							overflowY: 'auto'
+						}}>
+							<h3 style={{ marginTop: 0, color: '#1e293b' }}>Editar Produto</h3>
+							<form onSubmit={handleUpdateProduct}>
+								<div style={{ marginBottom: '16px' }}>
+									<label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+										Nome do Produto *
+									</label>
+									<input
+										type="text"
+										value={formData.nome}
+										onChange={(e) => setFormData({...formData, nome: e.target.value})}
+										style={{
+											width: '100%',
+											padding: '8px',
+											border: '1px solid #d1d5db',
+											borderRadius: '4px'
+										}}
+										required
+									/>
+								</div>
+
+								<div style={{ marginBottom: '16px' }}>
+									<label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+										Fabricante *
+									</label>
+									<input
+										type="text"
+										value={formData.fabricante}
+										onChange={(e) => setFormData({...formData, fabricante: e.target.value})}
+										style={{
+											width: '100%',
+											padding: '8px',
+											border: '1px solid #d1d5db',
+											borderRadius: '4px'
+										}}
+										required
+									/>
+								</div>
+
+								<div style={{ marginBottom: '16px' }}>
+									<label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+										Categoria *
+									</label>
+									<select
+										value={formData.categoria}
+										onChange={(e) => setFormData({...formData, categoria: e.target.value})}
+										style={{
+											width: '100%',
+											padding: '8px',
+											border: '1px solid #d1d5db',
+											borderRadius: '4px'
+										}}
+										required
+									>
+										<option value="">Selecione uma categoria</option>
+										<option value="Fertilizantes">Fertilizantes</option>
+										<option value="Defensivos">Defensivos</option>
+										<option value="Sementes">Sementes</option>
+										<option value="Inoculantes">Inoculantes</option>
+										<option value="Corretivos">Corretivos</option>
+										<option value="Condicionadores">Condicionadores</option>
+										<option value="Bioestimulantes">Bioestimulantes</option>
+									</select>
+								</div>
+
+								<div style={{ marginBottom: '16px' }}>
+									<label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+										Certificação
+									</label>
+									<input
+										type="text"
+										value={formData.certificacao}
+										onChange={(e) => setFormData({...formData, certificacao: e.target.value})}
+										style={{
+											width: '100%',
+											padding: '8px',
+											border: '1px solid #d1d5db',
+											borderRadius: '4px'
+										}}
+										placeholder="Ex: IBD, Ecocert, etc."
+									/>
+								</div>
+
+								<div style={{ marginBottom: '16px' }}>
+									<label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+										Classe Agronômica
+									</label>
+									<input
+										type="text"
+										value={formData.classeAgronomica}
+										onChange={(e) => setFormData({...formData, classeAgronomica: e.target.value})}
+										style={{
+											width: '100%',
+											padding: '8px',
+											border: '1px solid #d1d5db',
+											borderRadius: '4px'
+										}}
+										placeholder="Ex: Fertilizante orgânico simples"
+									/>
+								</div>
+
+								<div style={{ marginBottom: '16px' }}>
+									<label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+										Finalidade
+									</label>
+									<textarea
+										value={formData.finalidade}
+										onChange={(e) => setFormData({...formData, finalidade: e.target.value})}
+										style={{
+											width: '100%',
+											padding: '8px',
+											border: '1px solid #d1d5db',
+											borderRadius: '4px',
+											minHeight: '60px'
+										}}
+										placeholder="Descreva a finalidade do produto..."
+									/>
+								</div>
+
+								<div style={{ marginBottom: '16px' }}>
+									<label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+										Composição
+									</label>
+									<textarea
+										value={formData.composicao}
+										onChange={(e) => setFormData({...formData, composicao: e.target.value})}
+										style={{
+											width: '100%',
+											padding: '8px',
+											border: '1px solid #d1d5db',
+											borderRadius: '4px',
+											minHeight: '60px'
+										}}
+										placeholder="Descreva a composição do produto..."
+									/>
+								</div>
+
+								<div style={{ marginBottom: '16px' }}>
+									<label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+										Modo de Uso
+									</label>
+									<textarea
+										value={formData.modoUso}
+										onChange={(e) => setFormData({...formData, modoUso: e.target.value})}
+										style={{
+											width: '100%',
+											padding: '8px',
+											border: '1px solid #d1d5db',
+											borderRadius: '4px',
+											minHeight: '60px'
+										}}
+										placeholder="Descreva como usar o produto..."
+									/>
+								</div>
+
+								<div style={{ marginBottom: '16px' }}>
+									<label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+										Precauções
+									</label>
+									<textarea
+										value={formData.precaucoes}
+										onChange={(e) => setFormData({...formData, precaucoes: e.target.value})}
+										style={{
+											width: '100%',
+											padding: '8px',
+											border: '1px solid #d1d5db',
+											borderRadius: '4px',
+											minHeight: '60px'
+										}}
+										placeholder="Precauções de uso..."
+									/>
+								</div>
+
+								<div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+									<button
+										type="button"
+										onClick={closeEditForm}
+										style={{
+											background: '#6b7280',
+											color: 'white',
+											border: 'none',
+											padding: '8px 16px',
+											borderRadius: '4px',
+											cursor: 'pointer'
+										}}
+									>
+										Cancelar
+									</button>
+									<button
+										type="submit"
+										style={{
+											background: '#3b82f6',
+											color: 'white',
+											border: 'none',
+											padding: '8px 16px',
+											borderRadius: '4px',
+											cursor: 'pointer'
+										}}
+									>
+										Salvar Alterações
 									</button>
 								</div>
 							</form>
@@ -473,7 +883,7 @@ export default function ProdutosAdmin() {
 											</div>
 										</td>
 										<td style={{ padding: 12, textAlign: 'center' }}>
-											<div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+											<div style={{ display: 'flex', gap: '4px', justifyContent: 'center', flexWrap: 'wrap' }}>
 												<button
 													style={{
 														background: '#3b82f6',
@@ -484,7 +894,8 @@ export default function ProdutosAdmin() {
 														cursor: 'pointer',
 														fontSize: '12px'
 													}}
-													onClick={() => alert(`Editar ${produto.nome} (em desenvolvimento)`)}
+													onClick={() => handleEditProduct(produto)}
+													title="Editar produto"
 												>
 													✏️ Editar
 												</button>
@@ -500,6 +911,7 @@ export default function ProdutosAdmin() {
 															fontSize: '12px'
 														}}
 														onClick={() => toggleStatus(produto._id, 'inativo')}
+														title="Desativar produto"
 													>
 														⏸️ Desativar
 													</button>
@@ -515,10 +927,26 @@ export default function ProdutosAdmin() {
 															fontSize: '12px'
 														}}
 														onClick={() => toggleStatus(produto._id, 'ativo')}
+														title="Ativar produto"
 													>
 														▶️ Ativar
 													</button>
 												)}
+												<button
+													style={{
+														background: '#dc2626',
+														color: 'white',
+														border: 'none',
+														padding: '4px 8px',
+														borderRadius: '4px',
+														cursor: 'pointer',
+														fontSize: '12px'
+													}}
+													onClick={() => handleDeleteProduct(produto._id, produto.nome)}
+													title="Deletar produto permanentemente"
+												>
+													🗑️ Deletar
+												</button>
 											</div>
 										</td>
 									</tr>
