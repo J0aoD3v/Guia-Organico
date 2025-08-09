@@ -265,7 +265,9 @@ export default function UserAvatar() {
               color: "#6b7280",
               textAlign: "center"
             }}>
-              {pedidosMes !== null ? `${pedidosMes}/5 pedidos mês disponíveis` : "Carregando pedidos..."}
+              {pedidosMes !== null
+                ? `${Math.max(5 - pedidosMes, 0)}/5 pedidos mês disponíveis`
+                : "Carregando pedidos..."}
             </div>
           </div>
         </div>
