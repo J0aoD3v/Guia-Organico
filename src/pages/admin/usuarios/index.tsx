@@ -9,7 +9,7 @@ export default function UsuariosAdmin() {
 	const [usuarios, setUsuarios] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [editId, setEditId] = useState(null);
-	const [editData, setEditData] = useState({ limitePedidos: '', pedidosMes: '' });
+	const [editData, setEditData] = useState({ creditos: '' });
 
 	useEffect(() => {
 		if (status === 'loading') return;
@@ -31,8 +31,7 @@ export default function UsuariosAdmin() {
 	async function handleEdit(user) {
 		setEditId(user._id);
 		setEditData({
-			limitePedidos: user.limitePedidos ?? '',
-			pedidosMes: user.pedidosMes ?? ''
+			creditos: user.creditos ?? ''
 		});
 	}
 
@@ -43,7 +42,7 @@ export default function UsuariosAdmin() {
 			body: JSON.stringify({ id: editId, ...editData })
 		});
 		setEditId(null);
-		setEditData({ limitePedidos: '', pedidosMes: '' });
+		setEditData({ creditos: '' });
 		fetchUsuarios();
 	}
 
@@ -204,8 +203,9 @@ export default function UsuariosAdmin() {
 									<th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Função</th>
 									<th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Cadastro</th>
 									<th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Último Login</th>
-									<th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Limite</th>
-									<th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Solicitações</th>
+									<th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Créditos</th>
+									<th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Limite Global</th>
+									<th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Solicitações no mês</th>
 									<th style={{ padding: 12, textAlign: 'center', borderBottom: '1px solid #e5e7eb' }}>Ações</th>
 								</tr>
 							</thead>
@@ -242,17 +242,16 @@ export default function UsuariosAdmin() {
 										</td>
 										<td style={{ padding: 12, color: '#64748b', fontSize: '14px' }}>
 											{editId === user._id ? (
-												<input type="number" value={editData.limitePedidos} onChange={e => setEditData({ ...editData, limitePedidos: e.target.value })} style={{ width: 60 }} />
+												<input type="number" value={editData.creditos} onChange={e => setEditData({ ...editData, creditos: e.target.value })} style={{ width: 60 }} />
 											) : (
-												user.limitePedidos ?? '-'
+												user.creditos ?? '-'
 											)}
 										</td>
 										<td style={{ padding: 12, color: '#64748b', fontSize: '14px' }}>
-											{editId === user._id ? (
-												<input type="number" value={editData.pedidosMes} onChange={e => setEditData({ ...editData, pedidosMes: e.target.value })} style={{ width: 60 }} />
-											) : (
-												user.pedidosMes ?? '-'
-											)}
+											<LimiteGlobal />
+										</td>
+										<td style={{ padding: 12, color: '#64748b', fontSize: '14px' }}>
+											<SolicitacoesMes email={user.email} />
 										</td>
 										<td style={{ padding: 12, textAlign: 'center' }}>
 											<div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
@@ -280,4 +279,32 @@ export default function UsuariosAdmin() {
 			</div>
 		</div>
 	);
+}
+
+// Componente para buscar solicitações do mês
+function SolicitacoesMes({ email }) {
+	const [count, setCount] = useState('-');
+	useEffect(() => {
+		async function fetchCount() {
+			const res = await fetch(`/api/pedidos?email=${email}`);
+			const data = await res.json();
+			setCount(data.count ?? '-');
+		}
+		if (email) fetchCount();
+	}, [email]);
+	return <span>{count}</span>;
+}
+
+// Componente para buscar limite global
+function LimiteGlobal() {
+  const [limite, setLimite] = useState('-');
+  useEffect(() => {
+    async function fetchLimite() {
+      const res = await fetch(`/api/configuracoes`);
+      const data = await res.json();
+      setLimite(data.limitePedidos ?? '-');
+    }
+    fetchLimite();
+  }, []);
+  return <span>{limite}</span>;
 }

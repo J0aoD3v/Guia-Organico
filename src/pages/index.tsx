@@ -6,22 +6,28 @@ import { useSession } from "next-auth/react";
 
 export default function Home() {
   const { data: session } = useSession();
-  const [limitePedidos, setLimitePedidos] = useState<number | null>(null);
-  const [pedidosMes, setPedidosMes] = useState<number | null>(null);
+    const [limitePedidos, setLimitePedidos] = useState<number | null>(null);
+    const [pedidosMes, setPedidosMes] = useState<number | null>(null);
+    const [creditos, setCreditos] = useState<number | null>(null);
+    const [nextCycleDate, setNextCycleDate] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchDados() {
       try {
-        const [resPedidos, resLimite] = await Promise.all([
+        const [resPedidos, resLimite, resUsuario] = await Promise.all([
           fetch(`/api/pedidos?email=${session?.user?.email}`),
           fetch(`/api/configuracoes`),
+          fetch(`/api/usuarios`)
         ]);
 
         const pedidosData = await resPedidos.json();
         const limiteData = await resLimite.json();
+        const usuariosData = await resUsuario.json();
+        const usuarioAtual = usuariosData.find((u: any) => u.email === session?.user?.email);
 
         setPedidosMes(pedidosData.count ?? 0);
         setLimitePedidos(limiteData.limitePedidos ?? 5);
+        setCreditos(usuarioAtual?.creditos ?? null);
       } catch (err) {
         console.error("Erro ao buscar dados de pedidos e limite:", err);
       }
@@ -32,7 +38,7 @@ export default function Home() {
     }
   }, [session]);
 
-  const isSolicitacaoBloqueada = pedidosMes !== null && limitePedidos !== null && pedidosMes >= limitePedidos;
+  const isSolicitacaoBloqueada = creditos !== null && creditos <= 0;
 
   return (
     <>
@@ -52,13 +58,16 @@ export default function Home() {
         }}>
           <h1>🌱 Guia Orgânico</h1>
           <UserAvatar />
-        </header>
-
-        <main>
+            const pedidosData = await resPedidos.json();
+            const limiteData = await resLimite.json();
+            const usuariosData = await resUsuario.json();
+            const resCiclo = await fetch(`/api/ciclo`);
+            const cicloData = await resCiclo.json();
           <p style={{ fontSize: "18px", marginBottom: "20px" }}>
-            Uma plataforma digital para produtores e certificadoras que simplifica 
-            o acesso a informações sobre insumos autorizados, agiliza solicitações 
-            de autorização e conecta o setor da agricultura orgânica.
+            setPedidosMes(pedidosData.count ?? 0);
+            setLimitePedidos(limiteData.limitePedidos ?? 5);
+            setCreditos(usuarioAtual?.creditos ?? null);
+            setNextCycleDate(cicloData.nextCycleDate ?? null);
           </p>
 
           <div style={{ 
@@ -120,11 +129,11 @@ export default function Home() {
                 borderRadius: "4px",
                 cursor: isSolicitacaoBloqueada ? "not-allowed" : "pointer"
               }}>
-                {isSolicitacaoBloqueada ? "Limite Atingido" : "Solicitar Agora"}
+                {isSolicitacaoBloqueada ? "Créditos Esgotados" : "Solicitar Agora"}
               </button>
               {isSolicitacaoBloqueada && (
                 <div style={{ fontSize: "12px", color: "#ef4444", marginTop: "8px" }}>
-                  Limite atingido. Próxima liberação: 01/{new Date().getMonth() + 2}/{new Date().getFullYear()} ou entre em contato com o suporte.
+                  Créditos esgotados. Próxima liberação: 01/{new Date().getMonth() + 2}/{new Date().getFullYear()}.
                 </div>
               )}
             </div>
@@ -156,7 +165,7 @@ export default function Home() {
               </button>
             </Link>
           </div>
-        </main>
+        </header>
       </div>
     </>
   );

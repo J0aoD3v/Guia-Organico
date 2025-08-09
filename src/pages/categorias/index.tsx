@@ -31,20 +31,25 @@ export default function Categorias() {
   const { data: session } = useSession();
   const [limitePedidos, setLimitePedidos] = useState<number | null>(null);
   const [pedidosMes, setPedidosMes] = useState<number | null>(null);
+  const [creditos, setCreditos] = useState<number | null>(null);
 
   useEffect(() => {
     async function fetchDados() {
       try {
-        const [resPedidos, resLimite] = await Promise.all([
+        const [resPedidos, resLimite, resUsuario] = await Promise.all([
           fetch(`/api/pedidos?email=${session?.user?.email}`),
           fetch(`/api/configuracoes`),
+          fetch(`/api/usuarios`)
         ]);
 
         const pedidosData = await resPedidos.json();
         const limiteData = await resLimite.json();
+        const usuariosData = await resUsuario.json();
+        const usuarioAtual = usuariosData.find((u: any) => u.email === session?.user?.email);
 
         setPedidosMes(pedidosData.count ?? 0);
         setLimitePedidos(limiteData.limitePedidos ?? 5);
+        setCreditos(usuarioAtual?.creditos ?? null);
       } catch (err) {
         console.error("Erro ao buscar dados de pedidos e limite:", err);
       }
@@ -55,7 +60,7 @@ export default function Categorias() {
     }
   }, [session]);
 
-  const isSolicitacaoBloqueada = pedidosMes !== null && limitePedidos !== null && pedidosMes >= limitePedidos;
+  const isSolicitacaoBloqueada = creditos !== null && creditos <= 0;
 
   return (
     <>
@@ -162,8 +167,13 @@ export default function Categorias() {
                 cursor: isSolicitacaoBloqueada ? "not-allowed" : "pointer"
               }}
             >
-              📋 {isSolicitacaoBloqueada ? "Limite Atingido" : "Solicitar novo insumo"}
+              📋 {isSolicitacaoBloqueada ? "Créditos Esgotados" : "Solicitar novo insumo"}
             </Link>
+            {isSolicitacaoBloqueada && (
+              <div style={{ fontSize: "12px", color: "#ef4444", marginTop: "8px" }}>
+                Créditos esgotados. Próxima liberação: 01/{new Date().getMonth() + 2}/{new Date().getFullYear()}.
+              </div>
+            )}
           </div>
         </div>
       </main>

@@ -9,25 +9,31 @@ export default function UserAvatar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [pedidosMes, setPedidosMes] = useState<number | null>(null);
   const [limitePedidos, setLimitePedidos] = useState<number | null>(null);
+  const [creditos, setCreditos] = useState<number | null>(null);
 
   // Buscar limite de pedidos e contagem de pedidos do mês
   useEffect(() => {
     async function fetchDados() {
       if (session?.user?.email) {
         try {
-          const [resPedidos, resLimite] = await Promise.all([
+          const [resPedidos, resLimite, resUsuario] = await Promise.all([
             fetch(`/api/pedidos?email=${session.user.email}`),
             fetch(`/api/configuracoes`),
+            fetch(`/api/usuarios`)
           ]);
 
           const pedidosData = await resPedidos.json();
           const limiteData = await resLimite.json();
+          const usuariosData = await resUsuario.json();
+          const usuarioAtual = usuariosData.find((u: any) => u.email === session.user.email);
 
           setPedidosMes(pedidosData.count ?? 0);
           setLimitePedidos(limiteData.limitePedidos ?? 5);
+          setCreditos(usuarioAtual?.creditos ?? null);
         } catch (err) {
           setPedidosMes(null);
           setLimitePedidos(null);
+          setCreditos(null);
         }
       }
     }
@@ -274,9 +280,9 @@ export default function UserAvatar() {
               color: "#6b7280",
               textAlign: "center"
             }}>
-              {pedidosMes !== null && limitePedidos !== null
-                ? `${Math.max(limitePedidos - pedidosMes, 0)}/${limitePedidos} pedidos mês disponíveis`
-                : "Carregando pedidos..."}
+              {creditos !== null && limitePedidos !== null
+                ? `${creditos}/${limitePedidos} créditos disponíveis (meu/global)`
+                : "Carregando créditos..."}
             </div>
           </div>
         </div>

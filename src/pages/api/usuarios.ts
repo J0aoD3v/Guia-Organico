@@ -8,7 +8,7 @@ export default async function handler(
 ) {
   const client = await clientPromise;
   const db = client.db();
-  const collection = db.collection("usuarios");
+  const collection = db.collection("users");
 
   if (req.method === "GET") {
     // Listar todos os usuários

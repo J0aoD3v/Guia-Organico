@@ -83,12 +83,21 @@ export default NextAuth({
           });
 
           if (!existingUser) {
+            // Buscar limite global
+            let limiteGlobal = 5;
+            const config = await db
+              .collection("configuracoes")
+              .findOne({ chave: "limitePedidos" });
+            if (config?.valor) limiteGlobal = config.valor;
+
             await db.collection("users").insertOne({
               name: user.name,
               email: user.email,
               role: "user",
               provider: "google",
               createdAt: new Date(),
+              limitePedidos: limiteGlobal,
+              creditos: limiteGlobal,
             });
           }
         } catch (error) {
