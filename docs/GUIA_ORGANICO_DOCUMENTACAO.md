@@ -155,24 +155,35 @@ Admin->>API: Aprova ou rejeita
 API->>DB: Atualiza status
 ```
 
-## 5. Roadmap
+# 5. Roadmap de Desenvolvimento
 
-Concluído:
+## ✅ Sprint 1
 
-- Projeto base Next.js com TypeScript.
-- Conexão com MongoDB e GET `/api/products`.
+- [x] Configuração do projeto **Next.js** com **TypeScript**
+- [x] Instalação das dependências principais
+- [x] Criação e configuração do `.gitignore` e `.env.example`
+- [x] Setup da conexão **MongoDB** com padrão **Singleton**
+- [x] Remoção do `.env` do versionamento
+- [x] Teste do endpoint `/api/products`
+- [x] Build e checagem de tipos
+- [x] Estruturação inicial das pastas e rotas básicas
 
-Pendências imediatas:
+## 📌 Sprint 2
 
-- Definir nome do banco explicitamente em `client.db("<nome>")`.
-- Criar `public/` e `components/` conforme a UI evoluir.
-- Definir modelos e validação para `products` e iniciar CRUD completo.
+- [ ] Implementar autenticação (**NextAuth**)
+- [ ] CRUD de produtos
+- [ ] Painel **admin** básico
 
-Futuro:
+## 📌 Sprint 3
 
-- Fluxo de solicitações e notificações por email.
-- Painel administrativo.
-- Testes automatizados e métricas.
+- [ ] Fluxo de solicitações (**frontend + backend**)
+- [ ] Envio de notificações por e-mail
+
+## 📌 Sprint 4
+
+- [ ] Upload de imagens (**Cloudinary**)
+- [ ] Busca por foto (**API de visão computacional**)
+- [ ] Otimizações de performance e SEO
 
 ## 6. Métricas planejadas
 
