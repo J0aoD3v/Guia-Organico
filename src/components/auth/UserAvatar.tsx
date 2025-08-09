@@ -181,7 +181,7 @@ export default function UserAvatar() {
             <button
               onClick={() => {
                 setIsOpen(false);
-                router.push("/pedidos");
+                router.push("/meus-pedidos");
               }}
               style={{
                 width: "100%",
