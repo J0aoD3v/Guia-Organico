@@ -7,7 +7,7 @@ export default async function handler(
 ) {
   try {
     const client = await clientPromise;
-    const db = client.db(); // Use o nome do banco se quiser, ex: client.db('guia-organico')
+    const db = client.db("guia-organico"); // Nome específico do banco
     const products = await db.collection("products").find({}).toArray();
     res.status(200).json(products);
   } catch (error) {
