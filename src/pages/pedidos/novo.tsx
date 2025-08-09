@@ -4,7 +4,7 @@ import Navbar from "../../components/Navbar";
 import Link from "next/link";
 import ProtectedRoute from "../../components/auth/ProtectedRoute";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function NovoPedido() {
   const { data: session } = useSession();
@@ -17,6 +17,15 @@ export default function NovoPedido() {
     receberEmail: true,
   });
   const [enviado, setEnviado] = useState(false);
+  const [limiteAtingido, setLimiteAtingido] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [pedidosMes, setPedidosMes] = useState(0);
+  const fichaInput = useRef<HTMLInputElement>(null);
+  const bulaInput = useRef<HTMLInputElement>(null);
+  const [fichaFile, setFichaFile] = useState<File | null>(null);
+  const [bulaFile, setBulaFile] = useState<File | null>(null);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const target = e.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
@@ -24,9 +33,61 @@ export default function NovoPedido() {
     setForm((f) => ({ ...f, [name]: type === "checkbox" ? (target as HTMLInputElement).checked : value }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  useEffect(() => {
+    // Consulta o número de pedidos do usuário no mês
+    async function fetchPedidos() {
+      if (!session?.user?.email) return;
+      try {
+        const res = await fetch(`/api/pedidos?email=${session.user.email}`);
+        const data = await res.json();
+        setPedidosMes(data.count || 0);
+        if ((data.count || 0) >= 5) setLimiteAtingido(true);
+      } catch {
+        setPedidosMes(0);
+      }
+    }
+    fetchPedidos();
+  }, [session?.user?.email]);
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: "ficha" | "bula") {
+    const file = e.target.files?.[0] || null;
+    if (type === "ficha") setFichaFile(file);
+    if (type === "bula") setBulaFile(file);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setEnviado(true);
+    setError("");
+    setSuccess("");
+    setLoading(true);
+    if (limiteAtingido) {
+      setError("Limite de 5 pedidos por mês atingido. Aguarde o próximo mês para solicitar novamente.");
+      setLoading(false);
+      return;
+    }
+    if (!fichaFile || !bulaFile) {
+      setError("Anexe a ficha técnica e a bula do produto.");
+      setLoading(false);
+      return;
+    }
+    // Envia para API
+    const formData = new FormData();
+    Object.entries(form).forEach(([key, value]) => formData.append(key, String(value)));
+    formData.append("email", session?.user?.email || "");
+    formData.append("ficha", fichaFile);
+    formData.append("bula", bulaFile);
+    try {
+      const res = await fetch("/api/pedidos", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) throw new Error("Erro ao enviar pedido");
+      setEnviado(true);
+      setSuccess("Pedido enviado com sucesso!");
+    } catch (err) {
+      setError("Erro ao enviar pedido. Tente novamente ou envie por e-mail.");
+    }
+    setLoading(false);
   }
 
   // Email de suporte
@@ -79,8 +140,20 @@ export default function NovoPedido() {
           </ul>
         </div>
 
-        {!enviado ? (
-          <form onSubmit={handleSubmit} style={{ display: "grid", gap: 16 }}>
+        {limiteAtingido ? (
+          <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: 32, textAlign: "center", marginBottom: 32 }}>
+            <h2 style={{ color: "#dc2626" }}>Limite de pedidos atingido</h2>
+            <p style={{ color: "#7f1d1d", fontSize: 18 }}>
+              Você já realizou 5 pedidos este mês.<br />
+              Aguarde o próximo mês para solicitar novamente.<br />
+              Dúvidas? Fale com nosso suporte: <a href={`mailto:${emailSuporte}`}>{emailSuporte}</a>
+            </p>
+            <Link href="/" style={{ display: "inline-block", marginTop: "24px", padding: "12px 32px", background: "#10b981", color: "white", borderRadius: "8px", textDecoration: "none", fontWeight: "500" }}>
+              Voltar ao início
+            </Link>
+          </div>
+        ) : !enviado ? (
+          <form onSubmit={handleSubmit} style={{ display: "grid", gap: 16 }} encType="multipart/form-data">
           <div>
             <label style={{ display: "block", fontWeight: "600", marginBottom: "4px", color: "#374151" }}>
               NOME DO PRODUTO *
@@ -196,9 +269,35 @@ export default function NovoPedido() {
             backgroundColor: "#f9fafb"
           }}>
             <h4 style={{ margin: "0 0 12px 0", color: "#374151" }}>📎 Documentos Obrigatórios</h4>
-            <div style={{ color: "#64748b", fontSize: "15px" }}>
-              <strong>Em breve:</strong> anexos de ficha técnica e bula serão suportados diretamente aqui.<br />
-              Por enquanto, envie os documentos por e-mail para <a href={`mailto:${emailSuporte}`}>{emailSuporte}</a> após enviar o pedido.
+            <div style={{ display: "grid", gap: 12 }}>
+              <div>
+                <label style={{ display: "block", fontWeight: "500", marginBottom: "4px", color: "#374151" }}>
+                  Ficha Técnica *
+                </label>
+                <input 
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  ref={fichaInput}
+                  onChange={e => handleFileChange(e, "ficha")}
+                  required
+                  style={{ width: "100%", padding: "8px", border: "1px solid #d1d5db", borderRadius: 8 }}
+                />
+                {fichaFile && <span style={{ color: "#16a34a" }}>Arquivo selecionado: {fichaFile.name}</span>}
+              </div>
+              <div>
+                <label style={{ display: "block", fontWeight: "500", marginBottom: "4px", color: "#374151" }}>
+                  Bula do Produto *
+                </label>
+                <input 
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  ref={bulaInput}
+                  onChange={e => handleFileChange(e, "bula")}
+                  required
+                  style={{ width: "100%", padding: "8px", border: "1px solid #d1d5db", borderRadius: 8 }}
+                />
+                {bulaFile && <span style={{ color: "#16a34a" }}>Arquivo selecionado: {bulaFile.name}</span>}
+              </div>
             </div>
           </div>
 
@@ -216,6 +315,12 @@ export default function NovoPedido() {
             </label>
           </div>
 
+          {/* Mensagem de erro/sucesso */}
+          {(error || success) && (
+            <div style={{ margin: "16px 0", color: error ? "#dc2626" : "#16a34a", fontWeight: "500" }}>
+              {error || success}
+            </div>
+          )}
           {/* Botões de ação */}
           <div style={{ display: "flex", gap: 12, marginTop: "16px" }}>
             <button 
@@ -235,19 +340,20 @@ export default function NovoPedido() {
             
             <button 
               type="submit" 
+              disabled={loading}
               style={{ 
                 flex: 1,
                 padding: "12px 24px", 
-                background: "#10b981", 
+                background: loading ? "#a7f3d0" : "#10b981", 
                 color: "white", 
                 border: 0, 
                 borderRadius: 8,
-                cursor: "pointer",
+                cursor: loading ? "not-allowed" : "pointer",
                 fontSize: "16px",
                 fontWeight: "600"
               }}
             >
-              📤 Enviar Pedido de Autorização
+              {loading ? "Enviando..." : "📤 Enviar Pedido de Autorização"}
             </button>
           </div>
         </form>
