@@ -1,6 +1,6 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import clientPromise from '../../lib/db';
-import { ObjectId } from 'mongodb';
+import type { NextApiRequest, NextApiResponse } from "next";
+import clientPromise from "../../lib/db";
+import { ObjectId } from "mongodb";
 
 export const config = {
   api: {
@@ -8,10 +8,12 @@ export const config = {
   },
 };
 
-import formidable from 'formidable';
-import fs from 'fs';
+import formidable from "formidable";
+import fs from "fs";
 
-async function parseForm(req: NextApiRequest): Promise<{ fields: any; files: any }> {
+async function parseForm(
+  req: NextApiRequest
+): Promise<{ fields: any; files: any }> {
   return new Promise((resolve, reject) => {
     const form = formidable({ multiples: false });
     form.parse(req, (err, fields, files) => {
@@ -21,12 +23,15 @@ async function parseForm(req: NextApiRequest): Promise<{ fields: any; files: any
   });
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   const client = await clientPromise;
   const db = client.db();
-  const pedidos = db.collection('pedidos');
+  const pedidos = db.collection("pedidos");
 
-  if (req.method === 'GET') {
+  if (req.method === "GET") {
     // Retorna a contagem de pedidos do usuário no mês
     const { email } = req.query;
     if (email) {
@@ -44,12 +49,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json(all);
   }
 
-  if (req.method === 'POST') {
+  if (req.method === "POST") {
     try {
       const { fields, files } = await parseForm(req);
       // Salva arquivos localmente (pode ser ajustado para cloud)
-      const fichaPath = files.ficha ? `uploads/${Date.now()}_${files.ficha.originalFilename}` : null;
-      const bulaPath = files.bula ? `uploads/${Date.now()}_${files.bula.originalFilename}` : null;
+      const fichaPath = files.ficha
+        ? `uploads/${Date.now()}_${files.ficha.originalFilename}`
+        : null;
+      const bulaPath = files.bula
+        ? `uploads/${Date.now()}_${files.bula.originalFilename}`
+        : null;
       if (files.ficha) fs.copyFileSync(files.ficha.filepath, fichaPath);
       if (files.bula) fs.copyFileSync(files.bula.filepath, bulaPath);
       const pedido = {
@@ -61,7 +70,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       await pedidos.insertOne(pedido);
       return res.status(201).json({ ok: true });
     } catch (err) {
-      return res.status(500).json({ error: 'Erro ao salvar pedido' });
+      return res.status(500).json({ error: "Erro ao salvar pedido" });
     }
   }
 
