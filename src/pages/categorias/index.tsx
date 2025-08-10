@@ -4,33 +4,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 
-const categorias = [
-  {
-    nome: "Defensivos Orgânicos",
-    descricao: "Produtos para controle de pragas e doenças",
-    emoji: "🛡️",
-  },
-  {
-    nome: "Fertilizantes",
-    descricao: "Nutrição e adubação para plantas",
-    emoji: "🌱",
-  },
-  {
-    nome: "Inoculantes",
-    descricao: "Microorganismos benéficos para o solo",
-    emoji: "🦠",
-  },
-  {
-    nome: "Adjuvantes",
-    descricao: "Produtos que melhoram a eficácia de aplicações",
-    emoji: "⚡",
-  },
-];
-
 export default function Categorias() {
   const { data: session } = useSession();
   const [creditosUsuario, setCreditosUsuario] = useState<number | null>(null);
   const [proximoCiclo, setProximoCiclo] = useState<string>("");
+  const [categorias, setCategorias] = useState([]);
 
   useEffect(() => {
     async function fetchDados() {
@@ -66,6 +44,19 @@ export default function Categorias() {
       fetchDados();
     }
   }, [session]);
+
+  useEffect(() => {
+    async function fetchCategorias() {
+      try {
+        const res = await fetch("/api/categorias");
+        const data = await res.json();
+        setCategorias(data);
+      } catch (err) {
+        setCategorias([]);
+      }
+    }
+    fetchCategorias();
+  }, []);
 
   return (
     <>
@@ -107,7 +98,7 @@ export default function Categorias() {
         >
           {categorias.map((c) => (
             <Link
-              key={c.nome}
+              key={c._id || c.nome}
               href={`/categorias/${encodeURIComponent(c.nome)}`}
               style={{
                 border: "1px solid #e5e7eb",
@@ -129,13 +120,13 @@ export default function Categorias() {
               }}
             >
               <div style={{ fontSize: "32px", marginBottom: "12px" }}>
-                {c.emoji}
+                {c.emoji || "📂"}
               </div>
               <h3 style={{ margin: "0 0 8px 0", color: "#111827" }}>
                 {c.nome}
               </h3>
               <p style={{ margin: 0, color: "#6b7280", fontSize: "14px" }}>
-                {c.descricao}
+                {c.descricao || ""}
               </p>
               <div
                 style={{
