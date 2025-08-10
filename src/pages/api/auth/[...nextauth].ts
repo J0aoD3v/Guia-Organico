@@ -27,19 +27,6 @@ export default NextAuth({
           return null;
         }
 
-        // Admin hardcoded
-        if (
-          credentials.email === "admin" &&
-          credentials.password ===
-            "af89d56f8b00bf3d32a3eee1962ed989bb29434c2e1dd7c6836c8b0bcb5175c0"
-        ) {
-          return {
-            id: "admin",
-            name: "Administrador",
-            email: "admin@guia-organico.com",
-            role: "admin",
-          };
-        }
 
         try {
           const client = await clientPromise;
