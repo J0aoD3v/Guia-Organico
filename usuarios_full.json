@@ -1,0 +1,26 @@
+﻿
+
+StatusCode        : 200
+StatusDescription : OK
+Content           : [{"_id":"6897ed6ca8d17098588e84b0","name":"Administrador","email":"admi
+                    n@guia-organico.com","role":"admin","credito":"99999","password":"af89d
+                    56f8b00bf3d32a3eee1962ed989bb29434c2e1dd7c6836c8b0bcb5175c...
+RawContent        : HTTP/1.1 200 OK
+                    Vary: Accept-Encoding
+                    Connection: keep-alive
+                    Keep-Alive: timeout=5
+                    Content-Length: 408
+                    Content-Type: application/json; charset=utf-8
+                    Date: Sun, 10 Aug 2025 01:09:17 GMT
+                    ETag: "p...
+Forms             : {}
+Headers           : {[Vary, Accept-Encoding], [Connection, keep-alive], [Keep-Alive, 
+                    timeout=5], [Content-Length, 408]...}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : System.__ComObject
+RawContentLength  : 408
+
+
+

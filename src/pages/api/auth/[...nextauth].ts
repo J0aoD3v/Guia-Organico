@@ -50,8 +50,13 @@ export default NextAuth({
 
           // Verificação simples para MVP (em produção use bcrypt)
           if (user && user.password === credentials.password) {
-            // Se não tem crédito, setar o valor global
-            if (user.credito === undefined) {
+            // Se não tem crédito válido, setar o valor global
+            if (
+              user.credito === undefined ||
+              user.credito === null ||
+              Number(user.credito) <= 0 ||
+              isNaN(Number(user.credito))
+            ) {
               const config = await db
                 .collection("configuracoes")
                 .findOne({ chave: "global" });
@@ -87,16 +92,18 @@ export default NextAuth({
   },
   callbacks: {
     async signIn({ user, account }) {
-      // Para login com Google, salvar usuário no banco se não existir
+      // Para login com Google, garantir que o crédito seja setado corretamente
       if (account?.provider === "google") {
         try {
           const client = await clientPromise;
           const db = client.db("guia-organico");
-
-          const existingUser = await db.collection("users").findOne({
-            email: user.email,
-          });
-
+          const config = await db
+            .collection("configuracoes")
+            .findOne({ chave: "global" });
+          const creditoPadrao = config?.creditoPadrao ?? 0;
+          const existingUser = await db
+            .collection("users")
+            .findOne({ email: user.email });
           if (!existingUser) {
             await db.collection("users").insertOne({
               name: user.name,
@@ -104,7 +111,23 @@ export default NextAuth({
               role: "user",
               provider: "google",
               createdAt: new Date(),
+              credito: creditoPadrao,
             });
+          } else {
+            // Se o usuário já existe, garantir que o crédito está correto
+            if (
+              existingUser.credito === undefined ||
+              existingUser.credito === null ||
+              Number(existingUser.credito) <= 0 ||
+              isNaN(Number(existingUser.credito))
+            ) {
+              await db
+                .collection("users")
+                .updateOne(
+                  { _id: existingUser._id },
+                  { $set: { credito: creditoPadrao } }
+                );
+            }
           }
         } catch (error) {
           console.error("Erro ao salvar usuário do Google:", error);
