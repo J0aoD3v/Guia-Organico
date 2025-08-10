@@ -5,6 +5,37 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import * as GiIcons from "react-icons/gi";
+const gradientes = [
+  ["#10b981", "#3b82f6"],
+  ["#f59e42", "#ef4444"],
+  ["#a78bfa", "#f472b6"],
+  ["#34d399", "#fbbf24"],
+  ["#818cf8", "#38bdf8"],
+  ["#f43f5e", "#f59e42"],
+  ["#22d3ee", "#a3e635"],
+];
+
+function IconWithGradient({ Icon }) {
+  const gradIndex = Math.floor(Math.random() * gradientes.length);
+  const gradId = `cat-gradient-${gradIndex}-${Math.random()
+    .toString(36)
+    .substr(2, 5)}`;
+  const [start, end] = gradientes[gradIndex];
+  return (
+    <svg width={40} height={40} style={{ display: "block" }}>
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor={start} />
+          <stop offset="100%" stopColor={end} />
+        </linearGradient>
+      </defs>
+      <g>
+        {/* Aplicando o gradiente diretamente no atributo fill */}
+        <Icon size={40} style={{ fill: `url(#${gradId})` }} />
+      </g>
+    </svg>
+  );
+}
 
 export default function Categorias() {
   const { data: session } = useSession();
@@ -122,10 +153,14 @@ export default function Categorias() {
               }}
             >
               <div style={{ fontSize: "32px", marginBottom: "12px" }}>
-                {c.emoji && GiIcons[c.emoji]
-                  ? // Renderiza o ícone do react-icons pelo nome salvo no campo emoji
-                    React.createElement(GiIcons[c.emoji], { size: 32 })
-                  : "📂"}
+                {(() => {
+                  // Seleciona um degradê aleatório para cada categoria
+                  const Icon =
+                    c.emoji && GiIcons[c.emoji]
+                      ? GiIcons[c.emoji]
+                      : GiIcons["GiArchiveRegister"];
+                  return <IconWithGradient Icon={Icon} />;
+                })()}
               </div>
               <h3 style={{ margin: "0 0 8px 0", color: "#111827" }}>
                 {c.nome}

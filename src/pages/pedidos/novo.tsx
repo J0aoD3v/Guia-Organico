@@ -3,7 +3,7 @@ import Navbar from "../../components/Navbar";
 import Link from "next/link";
 import ProtectedRoute from "../../components/auth/ProtectedRoute";
 import { useSession } from "next-auth/react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function NovoPedido() {
   const { data: session } = useSession();
@@ -19,10 +19,26 @@ export default function NovoPedido() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [categorias, setCategorias] = useState([]);
   const fichaInput = useRef<HTMLInputElement>(null);
   const bulaInput = useRef<HTMLInputElement>(null);
   const [fichaFile, setFichaFile] = useState<File | null>(null);
   const [bulaFile, setBulaFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    async function fetchCategorias() {
+      try {
+        const res = await fetch("/api/categorias");
+        if (!res.ok) throw new Error("Erro ao buscar categorias");
+        const data = await res.json();
+        setCategorias(data);
+      } catch (err) {
+        console.error("Erro ao buscar categorias:", err);
+      }
+    }
+
+    fetchCategorias();
+  }, []);
 
   function handleChange(
     e: React.ChangeEvent<
@@ -228,12 +244,11 @@ export default function NovoPedido() {
                   }}
                 >
                   <option value="">Selecione uma categoria...</option>
-                  <option value="Defensivos Orgânicos">
-                    Defensivos Orgânicos
-                  </option>
-                  <option value="Fertilizantes">Fertilizantes</option>
-                  <option value="Inoculantes">Inoculantes</option>
-                  <option value="Adjuvantes">Adjuvantes</option>
+                  {categorias.map((categoria) => (
+                    <option key={categoria.id} value={categoria.nome}>
+                      {categoria.nome}
+                    </option>
+                  ))}
                 </select>
               </div>
 
