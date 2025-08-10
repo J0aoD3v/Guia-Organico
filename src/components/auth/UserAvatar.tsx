@@ -8,32 +8,34 @@ export default function UserAvatar() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [pedidosMes, setPedidosMes] = useState<number | null>(null);
-  const [limitePedidos, setLimitePedidos] = useState<number | null>(null);
-  const [creditos, setCreditos] = useState<number | null>(null);
+  const [creditosUsuario, setCreditosUsuario] = useState<number | null>(null);
+  const [creditosGlobais, setCreditosGlobais] = useState<number | null>(null);
 
-  // Buscar limite de pedidos e contagem de pedidos do mês
+  // Buscar créditos do usuário e créditos globais
   useEffect(() => {
     async function fetchDados() {
       if (session?.user?.email) {
         try {
-          const [resPedidos, resLimite, resUsuario] = await Promise.all([
+          const [resPedidos, resConfig, resUsuario] = await Promise.all([
             fetch(`/api/pedidos?email=${session.user.email}`),
             fetch(`/api/configuracoes`),
-            fetch(`/api/usuarios`)
+            fetch(`/api/usuarios`),
           ]);
 
           const pedidosData = await resPedidos.json();
-          const limiteData = await resLimite.json();
+          const configData = await resConfig.json();
           const usuariosData = await resUsuario.json();
-          const usuarioAtual = usuariosData.find((u: any) => u.email === session.user.email);
+          const usuarioAtual = usuariosData.find(
+            (u: any) => u.email === session.user.email
+          );
 
           setPedidosMes(pedidosData.count ?? 0);
-          setLimitePedidos(limiteData.limitePedidos ?? 5);
-          setCreditos(usuarioAtual?.creditos ?? null);
+          setCreditosGlobais(configData.creditoPadrao ?? 0);
+          setCreditosUsuario(usuarioAtual?.credito ?? 0);
         } catch (err) {
           setPedidosMes(null);
-          setLimitePedidos(null);
-          setCreditos(null);
+          setCreditosGlobais(null);
+          setCreditosUsuario(null);
         }
       }
     }
@@ -43,7 +45,10 @@ export default function UserAvatar() {
   // Fechar dropdown quando clicar fora
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     }
@@ -56,15 +61,17 @@ export default function UserAvatar() {
 
   if (status === "loading") {
     return (
-      <div style={{ 
-        width: "40px", 
-        height: "40px", 
-        borderRadius: "50%", 
-        backgroundColor: "#f3f4f6",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center"
-      }}>
+      <div
+        style={{
+          width: "40px",
+          height: "40px",
+          borderRadius: "50%",
+          backgroundColor: "#f3f4f6",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <span style={{ fontSize: "12px" }}>...</span>
       </div>
     );
@@ -81,7 +88,7 @@ export default function UserAvatar() {
           border: "none",
           borderRadius: "4px",
           cursor: "pointer",
-          fontSize: "14px"
+          fontSize: "14px",
         }}
       >
         Entrar
@@ -109,7 +116,7 @@ export default function UserAvatar() {
           overflow: "hidden",
           display: "flex",
           alignItems: "center",
-          justifyContent: "center"
+          justifyContent: "center",
         }}
       >
         {userImage ? (
@@ -120,21 +127,23 @@ export default function UserAvatar() {
               width: "100%",
               height: "100%",
               objectFit: "cover",
-              borderRadius: "50%"
+              borderRadius: "50%",
             }}
           />
         ) : (
-          <span style={{
-            fontSize: "16px",
-            fontWeight: "bold",
-            color: "#374151",
-            backgroundColor: "#f3f4f6",
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center"
-          }}>
+          <span
+            style={{
+              fontSize: "16px",
+              fontWeight: "bold",
+              color: "#374151",
+              backgroundColor: "#f3f4f6",
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             {userInitials}
           </span>
         )}
@@ -142,23 +151,29 @@ export default function UserAvatar() {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div style={{
-          position: "absolute",
-          top: "50px",
-          right: "0",
-          backgroundColor: "white",
-          border: "1px solid #e5e7eb",
-          borderRadius: "8px",
-          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-          minWidth: "200px",
-          zIndex: 1000
-        }}>
+        <div
+          style={{
+            position: "absolute",
+            top: "50px",
+            right: "0",
+            backgroundColor: "white",
+            border: "1px solid #e5e7eb",
+            borderRadius: "8px",
+            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+            minWidth: "200px",
+            zIndex: 1000,
+          }}
+        >
           {/* Informações do usuário */}
-          <div style={{
-            padding: "12px 16px",
-            borderBottom: "1px solid #e5e7eb"
-          }}>
-            <div style={{ fontWeight: "600", fontSize: "14px", color: "#111827" }}>
+          <div
+            style={{
+              padding: "12px 16px",
+              borderBottom: "1px solid #e5e7eb",
+            }}
+          >
+            <div
+              style={{ fontWeight: "600", fontSize: "14px", color: "#111827" }}
+            >
               {userName}
             </div>
             <div style={{ fontSize: "12px", color: "#6b7280" }}>
@@ -181,7 +196,7 @@ export default function UserAvatar() {
                 border: "none",
                 cursor: "pointer",
                 fontSize: "14px",
-                color: "#374151"
+                color: "#374151",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = "#f3f4f6";
@@ -206,7 +221,7 @@ export default function UserAvatar() {
                 border: "none",
                 cursor: "pointer",
                 fontSize: "14px",
-                color: "#374151"
+                color: "#374151",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = "#f3f4f6";
@@ -232,7 +247,7 @@ export default function UserAvatar() {
                   border: "none",
                   cursor: "pointer",
                   fontSize: "14px",
-                  color: "#374151"
+                  color: "#374151",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = "#f3f4f6";
@@ -245,7 +260,13 @@ export default function UserAvatar() {
               </button>
             )}
 
-            <hr style={{ margin: "8px 0", border: "none", borderTop: "1px solid #e5e7eb" }} />
+            <hr
+              style={{
+                margin: "8px 0",
+                border: "none",
+                borderTop: "1px solid #e5e7eb",
+              }}
+            />
 
             <button
               onClick={() => {
@@ -260,7 +281,7 @@ export default function UserAvatar() {
                 border: "none",
                 cursor: "pointer",
                 fontSize: "14px",
-                color: "#ef4444"
+                color: "#ef4444",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = "#fef2f2";
@@ -272,16 +293,18 @@ export default function UserAvatar() {
               🚪 Sair
             </button>
 
-            {/* Pedidos disponíveis no mês */}
-            <div style={{
-              width: "100%",
-              padding: "8px 16px",
-              fontSize: "13px",
-              color: "#6b7280",
-              textAlign: "center"
-            }}>
-              {creditos !== null && limitePedidos !== null
-                ? `${creditos}/${limitePedidos} créditos disponíveis (meu/global)`
+            {/* Créditos disponíveis */}
+            <div
+              style={{
+                width: "100%",
+                padding: "8px 16px",
+                fontSize: "13px",
+                color: "#6b7280",
+                textAlign: "center",
+              }}
+            >
+              {creditosUsuario !== null && creditosGlobais !== null
+                ? `Créditos: ${creditosUsuario} / ${creditosGlobais}`
                 : "Carregando créditos..."}
             </div>
           </div>

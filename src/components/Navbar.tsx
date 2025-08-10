@@ -10,21 +10,24 @@ export default function Navbar() {
   const [limitePedidos, setLimitePedidos] = useState<number | null>(null);
   const [pedidosMes, setPedidosMes] = useState<number | null>(null);
   const [creditos, setCreditos] = useState<number | null>(null);
-  const [nextCycleDate, setNextCycleDate] = useState<string | null>(null);
+  const [proximoCiclo, setProximoCiclo] = useState<string>("");
   const router = useRouter();
 
   useEffect(() => {
     async function fetchDados() {
       try {
-        const [resPedidos, resLimite, resUsuario] = await Promise.all([
-          fetch(`/api/pedidos?email=${session?.user?.email}`),
-          fetch(`/api/configuracoes`),
-          fetch(`/api/usuarios`),
-        ]);
+        const [resPedidos, resLimite, resUsuario, resCiclo] = await Promise.all(
+          [
+            fetch(`/api/pedidos?email=${session?.user?.email}`),
+            fetch(`/api/configuracoes`),
+            fetch(`/api/usuarios`),
+            fetch(`/api/ciclo`),
+          ]
+        );
+
         const pedidosData = await resPedidos.json();
         const limiteData = await resLimite.json();
         const usuariosData = await resUsuario.json();
-        const resCiclo = await fetch(`/api/ciclo`);
         const cicloData = await resCiclo.json();
         const usuarioAtual = usuariosData.find(
           (u: any) => u.email === session?.user?.email
@@ -32,8 +35,8 @@ export default function Navbar() {
 
         setPedidosMes(pedidosData.count ?? 0);
         setLimitePedidos(limiteData.limitePedidos ?? 5);
-        setNextCycleDate(cicloData.nextCycleDate ?? null);
         setCreditos(usuarioAtual?.creditos ?? null);
+        setProximoCiclo(cicloData.proximoCiclo ?? "");
       } catch (err) {
         console.error("Erro ao buscar dados de pedidos e limite:", err);
       }
@@ -186,8 +189,7 @@ export default function Navbar() {
             <div
               style={{ fontSize: "12px", color: "#ef4444", marginTop: "8px" }}
             >
-              Créditos esgotados. Próxima liberação: 01/
-              {new Date().getMonth() + 2}/{new Date().getFullYear()}.
+              Créditos esgotados. Próxima liberação: {proximoCiclo}.
             </div>
           )}
 

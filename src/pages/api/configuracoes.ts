@@ -11,24 +11,29 @@ export default async function handler(
     const configuracoes = db.collection("configuracoes");
 
     if (req.method === "GET") {
-      const config = await configuracoes.findOne({ chave: "limitePedidos" });
-      const limitePedidos = config?.valor ?? 5; // Valor padrão: 5
-      return res.status(200).json({ limitePedidos });
+      // Buscar configurações globais
+      const config = await configuracoes.findOne({ chave: "global" });
+      const emailNotificacoes = config?.emailNotificacoes ?? true;
+      const manutencao = config?.manutencao ?? false;
+      const creditoPadrao = config?.creditoPadrao ?? 0;
+      return res
+        .status(200)
+        .json({ emailNotificacoes, manutencao, creditoPadrao });
     }
 
     if (req.method === "POST") {
-      const { limitePedidos } = req.body;
-      if (typeof limitePedidos !== "number" || limitePedidos < 1) {
-        return res.status(400).json({ error: "Limite inválido" });
+      const { emailNotificacoes, manutencao, creditoPadrao } = req.body;
+      if (typeof creditoPadrao !== "number" || creditoPadrao < 0) {
+        return res.status(400).json({ error: "Crédito inválido" });
       }
-
       await configuracoes.updateOne(
-        { chave: "limitePedidos" },
-        { $set: { valor: limitePedidos } },
+        { chave: "global" },
+        { $set: { emailNotificacoes, manutencao, creditoPadrao } },
         { upsert: true }
       );
-
-      return res.status(200).json({ message: "Limite atualizado com sucesso" });
+      return res
+        .status(200)
+        .json({ message: "Configurações atualizadas com sucesso" });
     }
 
     res.setHeader("Allow", ["GET", "POST"]);

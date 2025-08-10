@@ -50,11 +50,26 @@ export default NextAuth({
 
           // Verificação simples para MVP (em produção use bcrypt)
           if (user && user.password === credentials.password) {
+            // Se não tem crédito, setar o valor global
+            if (user.credito === undefined) {
+              const config = await db
+                .collection("configuracoes")
+                .findOne({ chave: "global" });
+              const creditoPadrao = config?.creditoPadrao ?? 0;
+              await db
+                .collection("users")
+                .updateOne(
+                  { _id: user._id },
+                  { $set: { credito: creditoPadrao } }
+                );
+              user.credito = creditoPadrao;
+            }
             return {
               id: user._id.toString(),
               name: user.name,
               email: user.email,
               role: user.role || "user",
+              credito: user.credito,
             };
           }
 
@@ -71,7 +86,7 @@ export default NextAuth({
     maxAge: 24 * 60 * 60, // 24 horas
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       // Para login com Google, salvar usuário no banco se não existir
       if (account?.provider === "google") {
         try {
@@ -83,21 +98,12 @@ export default NextAuth({
           });
 
           if (!existingUser) {
-            // Buscar limite global
-            let limiteGlobal = 5;
-            const config = await db
-              .collection("configuracoes")
-              .findOne({ chave: "limitePedidos" });
-            if (config?.valor) limiteGlobal = config.valor;
-
             await db.collection("users").insertOne({
               name: user.name,
               email: user.email,
               role: "user",
               provider: "google",
               createdAt: new Date(),
-              limitePedidos: limiteGlobal,
-              creditos: limiteGlobal,
             });
           }
         } catch (error) {

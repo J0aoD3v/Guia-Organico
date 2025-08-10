@@ -18,8 +18,11 @@ export default async function handler(
 
   if (req.method === "PUT") {
     // Editar usuário
-    const { id, ...dados } = req.body;
-    await collection.updateOne({ _id: new ObjectId(id) }, { $set: dados });
+    const { id, credito } = req.body;
+    await collection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { credito } }
+    );
     return res.status(200).json({ success: true });
   }
 
