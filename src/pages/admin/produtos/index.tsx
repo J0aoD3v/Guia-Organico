@@ -525,13 +525,11 @@ export default function ProdutosAdmin() {
                     required
                   >
                     <option value="">Selecione uma categoria</option>
-                    <option value="Fertilizantes">Fertilizantes</option>
-                    <option value="Defensivos">Defensivos</option>
-                    <option value="Sementes">Sementes</option>
-                    <option value="Inoculantes">Inoculantes</option>
-                    <option value="Corretivos">Corretivos</option>
-                    <option value="Condicionadores">Condicionadores</option>
-                    <option value="Bioestimulantes">Bioestimulantes</option>
+                    {categorias.map((cat) => (
+                      <option key={cat._id || cat.nome} value={cat.nome}>
+                        {cat.nome}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

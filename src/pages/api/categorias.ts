@@ -25,6 +25,16 @@ export default async function handler(
     return res.status(201).json({ ok: true, id: result.insertedId });
   }
 
+  if (req.method === "PUT") {
+    const { nome, emoji } = req.body;
+    if (!nome || !emoji)
+      return res.status(400).json({ error: "Nome e emoji obrigatórios" });
+    const result = await categorias.updateOne({ nome }, { $set: { emoji } });
+    if (result.matchedCount === 0)
+      return res.status(404).json({ error: "Categoria não encontrada" });
+    return res.status(200).json({ ok: true });
+  }
+
   if (req.method === "DELETE") {
     const { id } = req.body;
     if (!id) return res.status(400).json({ error: "ID obrigatório" });
