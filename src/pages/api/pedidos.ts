@@ -117,6 +117,23 @@ export default async function handler(
           result.insertedId
         );
 
+        // Descontar crédito do usuário e incrementar solicitacoesMes
+        const users = db.collection("users");
+        const usuario = await users.findOne({ email: pedido.email });
+        if (usuario && usuario.credito > 0) {
+          await users.updateOne(
+            { email: pedido.email },
+            {
+              $inc: { credito: -1, solicitacoesMes: 1 },
+            }
+          );
+          console.log(`🟢 Crédito descontado de ${pedido.email}`);
+        } else {
+          console.log(
+            `⚠️ Usuário não encontrado ou sem crédito: ${pedido.email}`
+          );
+        }
+
         return res.status(201).json({ ok: true, id: result.insertedId });
       } catch (err) {
         console.error("❌ [API] Erro no POST:", err);
