@@ -1,5 +1,10 @@
 import clientPromise from "./db";
 
+// Verificar se o interceptor já foi inicializado globalmente
+declare global {
+  var __serverLoggerInitialized: boolean | undefined;
+}
+
 // Interceptar console.log e console.error para salvar no banco
 const originalConsoleLog = console.log;
 const originalConsoleError = console.error;
@@ -9,8 +14,11 @@ const originalConsoleInfo = console.info;
 let isIntercepting = false;
 
 export function initializeServerLogging() {
-  if (isIntercepting) return;
+  if (isIntercepting || global.__serverLoggerInitialized) {
+    return;
+  }
   isIntercepting = true;
+  global.__serverLoggerInitialized = true;
 
   console.log = (...args: any[]) => {
     originalConsoleLog(...args);
