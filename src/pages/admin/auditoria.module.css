@@ -1,0 +1,29 @@
+@import url("https://fonts.googleapis.com/css2?family=Cascadia+Code:ital,wght@0,200..700;1,200..700&display=swap");
+
+.consoleLog {
+  font-family: "Cascadia Code", monospace;
+  background: #18181b;
+  color: #22c55e;
+  padding: 30px;
+  font-size: 20px;
+  overflow: auto;
+  max-height: 100%;
+  margin: 0;
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+  text-align: left;
+  font-weight: 400;
+  font-style: normal;
+  scrollbar-color: #22d3ee #18181b;
+  scrollbar-width: thin;
+}
+
+.consoleLog::-webkit-scrollbar {
+  width: 8px;
+  background: #18181b;
+}
+.consoleLog::-webkit-scrollbar-thumb {
+  background: #22d3ee;
+  border-radius: 8px;
+}

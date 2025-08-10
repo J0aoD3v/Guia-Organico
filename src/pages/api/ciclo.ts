@@ -1,4 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { logAction } from "../../lib/logAction";
+import { getSession } from "next-auth/react";
 
 export default async function handler(
   req: NextApiRequest,
@@ -9,6 +11,9 @@ export default async function handler(
   }
 
   try {
+    const session = await getSession({ req });
+    const usuarioLogado = session?.user?.email;
+
     // Calcula a data do próximo ciclo (primeiro dia do próximo mês)
     const agora = new Date();
     const proximoMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 1);
@@ -19,6 +24,17 @@ export default async function handler(
     const ano = proximoMes.getFullYear();
 
     const dataFormatada = `${dia}/${mes}/${ano}`;
+
+    await logAction({
+      usuario: usuarioLogado || "anon",
+      acao: "GET",
+      endpoint: "/api/ciclo",
+      detalhes: {
+        proximoCiclo: dataFormatada,
+        proximoCicloISO: proximoMes.toISOString(),
+        consultadoEm: agora.toISOString(),
+      },
+    });
 
     res.status(200).json({
       proximoCiclo: dataFormatada,

@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import clientPromise from "../../lib/db";
 import { ObjectId } from "mongodb";
+import { logAction } from "../../lib/logAction";
+import { getSession } from "next-auth/react";
 
 export default async function handler(
   req: NextApiRequest,
@@ -16,6 +18,7 @@ export default async function handler(
   }
 
   try {
+    const session = await getSession({ req });
     const client = await clientPromise;
     const db = client.db("guia-organico");
     const pedido = await db
@@ -73,9 +76,49 @@ export default async function handler(
     }
     res.setHeader("Content-Type", info.tipo || "application/pdf");
     res.setHeader("Content-Disposition", `inline; filename=\"${info.nome}\"`);
+
+    // Log da ação
+    await logAction({
+      usuario: session?.user?.email || "sistema",
+      acao: "download_anexo",
+      endpoint: req.url || "/api/download-anexo",
+      detalhes: {
+        method: req.method || "GET",
+        pedidoId: String(pedidoId),
+        tipoAnexo: String(tipo),
+        nomeArquivo: info.nome,
+        tamanhoBuffer: fileBuffer.length,
+        ipAddress:
+          (req.headers["x-forwarded-for"] as string) ||
+          req.socket.remoteAddress ||
+          "unknown",
+        userAgent: req.headers["user-agent"] || "unknown",
+      },
+    });
+
     res.send(fileBuffer);
   } catch (error) {
     console.error("Erro ao baixar anexo:", error);
+
+    // Log do erro
+    await logAction({
+      usuario: "sistema",
+      acao: "erro_download_anexo",
+      endpoint: req.url || "/api/download-anexo",
+      detalhes: {
+        method: req.method || "GET",
+        pedidoId: String(req.query.pedidoId || ""),
+        tipoAnexo: String(req.query.tipo || ""),
+        erro: error.message,
+        stack: error.stack,
+        ipAddress:
+          (req.headers["x-forwarded-for"] as string) ||
+          req.socket.remoteAddress ||
+          "unknown",
+        userAgent: req.headers["user-agent"] || "unknown",
+      },
+    });
+
     res.status(500).json({ message: "Erro interno do servidor" });
   }
 }

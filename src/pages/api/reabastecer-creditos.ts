@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import clientPromise from "../../lib/db";
+import { logAction } from "../../lib/logAction";
+import { getSession } from "next-auth/react";
 
 export default async function handler(
   req: NextApiRequest,
@@ -12,6 +14,9 @@ export default async function handler(
   try {
     const client = await clientPromise;
     const db = client.db("guia-organico");
+    const session = await getSession({ req });
+    const usuarioLogado = session?.user?.email;
+
     const config = await db
       .collection("configuracoes")
       .findOne({ chave: "global" });
@@ -42,6 +47,19 @@ export default async function handler(
         { role: { $ne: "admin" } },
         { $set: { credito: creditoPadrao, solicitacoesMes: 0 } }
       );
+
+    await logAction({
+      usuario: usuarioLogado || "anon",
+      acao: "GET",
+      endpoint: "/api/reabastecer-creditos",
+      detalhes: {
+        creditoPadrao,
+        usuariosAfetados: result.modifiedCount,
+        historicoSalvo: usuarios.length,
+        cicloAtual: cicloAtual.toISOString(),
+      },
+    });
+
     res.status(200).json({
       success: true,
       modifiedCount: result.modifiedCount,

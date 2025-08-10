@@ -21,6 +21,14 @@ export default async function handler(
       usuario: usuarioLogado || req.query.email || "anon",
       acao: "GET",
       endpoint: "/api/categorias",
+      detalhes: {
+        totalCategorias: all.length,
+        categorias: all.map((c) => ({
+          _id: c._id,
+          nome: c.nome,
+          descricao: c.descricao,
+        })),
+      },
     });
     return res.status(200).json(all);
   }

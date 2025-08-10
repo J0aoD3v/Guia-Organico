@@ -25,6 +25,19 @@ export default async function handler(
       usuario: usuarioLogado || req.query.email || "anon",
       acao: "GET",
       endpoint: "/api/usuarios",
+      detalhes: {
+        totalUsuarios: usuarios.length,
+        usuarios: usuarios.map((u) => ({
+          _id: u._id,
+          name: u.name,
+          email: u.email,
+          role: u.role,
+          credito: u.credito,
+          provider: u.provider,
+          createdAt: u.createdAt,
+          solicitacoesMes: u.solicitacoesMes,
+        })),
+      },
     });
     return res.status(200).json(usuarios);
   }

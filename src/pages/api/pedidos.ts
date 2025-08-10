@@ -77,6 +77,18 @@ export default async function handler(
         usuario: usuarioLogado || req.query.email || "anon",
         acao: "GET",
         endpoint: "/api/pedidos",
+        detalhes: {
+          totalPedidos: all.length,
+          filtros: filtro,
+          pedidos: all.map((p) => ({
+            _id: p._id,
+            status: p.status,
+            categoria: p.categoria,
+            descricao: p.descricao,
+            usuarioEmail: p.usuarioEmail,
+            createdAt: p.createdAt,
+          })),
+        },
       });
       return res.status(200).json(all);
     }

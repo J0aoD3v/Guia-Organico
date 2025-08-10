@@ -4,6 +4,13 @@ import type { Session } from "next-auth";
 import "../styles/globals.css";
 import { useEffect, useState } from "react";
 
+// Inicializar logs do servidor apenas no lado do servidor
+if (typeof window === "undefined") {
+  import("../lib/serverLogger").then(({ initializeServerLogging }) => {
+    initializeServerLogging();
+  });
+}
+
 type AppPropsWithAuth = AppProps & {
   pageProps: {
     session?: Session;
@@ -22,18 +29,24 @@ export default function App({
   return (
     <SessionProvider session={session}>
       {splash ? (
-        <div style={{
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexDirection: "column",
-          background: "#f8fafc",
-          transition: "opacity 300ms"
-        }}>
+        <div
+          style={{
+            height: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "column",
+            background: "#f8fafc",
+            transition: "opacity 300ms",
+          }}
+        >
           <div style={{ fontSize: 56 }}>🌱</div>
-          <div style={{ marginTop: 8, fontWeight: 800, letterSpacing: 1 }}>GUIA ORGÂNICO</div>
-          <div style={{ color: "#6b7280", marginTop: 4 }}>O Aplicativo que Simplifica a Agricultura Orgânica</div>
+          <div style={{ marginTop: 8, fontWeight: 800, letterSpacing: 1 }}>
+            GUIA ORGÂNICO
+          </div>
+          <div style={{ color: "#6b7280", marginTop: 4 }}>
+            O Aplicativo que Simplifica a Agricultura Orgânica
+          </div>
         </div>
       ) : (
         <Component {...pageProps} />

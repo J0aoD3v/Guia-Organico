@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import clientPromise from "../../../lib/db";
+import { logAction } from "../../../lib/logAction";
+import { getSession } from "next-auth/react";
 
 export default async function handler(
   req: NextApiRequest,
@@ -12,12 +14,30 @@ export default async function handler(
   try {
     const client = await clientPromise;
     const db = client.db("guia-organico");
+    const session = await getSession({ req });
+    const usuarioLogado = session?.user?.email;
 
     const produtos = await db
       .collection("produtos")
       .find({ status: "ativo" })
       .sort({ criadoEm: -1 })
       .toArray();
+
+    await logAction({
+      usuario: usuarioLogado || "anon",
+      acao: "GET",
+      endpoint: "/api/produtos/todos",
+      detalhes: {
+        totalProdutosAtivos: produtos.length,
+        produtos: produtos.slice(0, 5).map((p) => ({
+          // Apenas os 5 primeiros
+          _id: p._id,
+          nome: p.nome,
+          fabricante: p.fabricante,
+          categoria: p.categoria,
+        })),
+      },
+    });
 
     res.status(200).json(produtos);
   } catch (error) {

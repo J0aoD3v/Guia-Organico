@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import clientPromise from "../../lib/db";
 import { ObjectId } from "mongodb";
+import { logAction } from "../../lib/logAction";
+import { getSession } from "next-auth/react";
 
 export default async function handler(
   req: NextApiRequest,
@@ -12,6 +14,8 @@ export default async function handler(
     const client = await clientPromise;
     const db = client.db("guia-organico");
     const produtos = db.collection("produtos");
+    const session = await getSession({ req });
+    const usuarioLogado = session?.user?.email;
     console.log("✅ [API] Conectado ao MongoDB");
 
     if (req.method === "GET") {
@@ -60,6 +64,24 @@ export default async function handler(
         .sort({ criadoEm: -1 })
         .toArray();
 
+      await logAction({
+        usuario: usuarioLogado || req.query.email || "anon",
+        acao: "GET",
+        endpoint: "/api/produtos",
+        detalhes: {
+          totalProdutos: result.length,
+          filtros: filter,
+          produtos: result.map((p) => ({
+            _id: p._id,
+            nome: p.nome,
+            fabricante: p.fabricante,
+            categoria: p.categoria,
+            status: p.status,
+            criadoEm: p.criadoEm,
+          })),
+        },
+      });
+
       return res.status(200).json(result);
     }
 
@@ -104,6 +126,13 @@ export default async function handler(
         console.log("🗄️ [API] Inserindo produto no MongoDB:", novoProduto);
         const result = await produtos.insertOne(novoProduto);
         console.log("✅ [API] Produto criado com sucesso");
+
+        await logAction({
+          usuario: usuarioLogado || "anon",
+          acao: "POST",
+          endpoint: "/api/produtos",
+          detalhes: { produtoId: result.insertedId, produto: novoProduto },
+        });
 
         return res.status(201).json({
           message: "Produto criado com sucesso",
@@ -150,6 +179,13 @@ export default async function handler(
           return res.status(404).json({ error: "Produto não encontrado" });
         }
 
+        await logAction({
+          usuario: usuarioLogado || "anon",
+          acao: "PUT",
+          endpoint: "/api/produtos",
+          detalhes: { produtoId: id, updateData },
+        });
+
         console.log("✅ [API] Produto atualizado com sucesso");
         return res
           .status(200)
@@ -181,6 +217,13 @@ export default async function handler(
         if (result.deletedCount === 0) {
           return res.status(404).json({ error: "Produto não encontrado" });
         }
+
+        await logAction({
+          usuario: usuarioLogado || "anon",
+          acao: "DELETE",
+          endpoint: "/api/produtos",
+          detalhes: { produtoId: id },
+        });
 
         console.log("✅ [API] Produto deletado com sucesso");
         return res

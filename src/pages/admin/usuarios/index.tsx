@@ -23,12 +23,28 @@ export default function UsuariosAdmin() {
     fetchUsuarios();
   }, [session, status, router]);
 
+  useEffect(() => {
+    console.log("[DEBUG] Estado usuarios atualizado:", usuarios);
+    console.log("[DEBUG] Quantidade no estado:", usuarios.length);
+  }, [usuarios]);
+
   async function fetchUsuarios() {
     try {
       setLoading(true);
+      console.log("[DEBUG] Fazendo request para /api/usuarios...");
       const res = await fetch("/api/usuarios");
+      console.log("[DEBUG] Resposta recebida:", res.status, res.statusText);
       const data = await res.json();
+      console.log("[DEBUG] Dados recebidos:", data);
+      console.log(
+        "[DEBUG] Tipo dos dados:",
+        typeof data,
+        Array.isArray(data) ? "é array" : "não é array"
+      );
+      console.log("[DEBUG] Quantidade de usuários:", data?.length || 0);
       setUsuarios(data);
+    } catch (error) {
+      console.error("[DEBUG] Erro ao buscar usuários:", error);
     } finally {
       setLoading(false);
     }

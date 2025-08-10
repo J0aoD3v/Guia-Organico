@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import clientPromise from "../../../lib/db";
+import { logAction } from "../../../lib/logAction";
 
 export default NextAuth({
   providers: [
@@ -64,6 +65,19 @@ export default NextAuth({
             };
           }
 
+          // Log de tentativa de login falhada
+          await logAction({
+            usuario: credentials.email,
+            acao: "login_falhado_credenciais",
+            endpoint: "/api/auth/[...nextauth]",
+            detalhes: {
+              method: "POST",
+              email: credentials.email,
+              motivo: "credenciais_invalidas",
+              provider: "credentials",
+            },
+          });
+
           return null;
         } catch (error) {
           console.error("Erro na autenticação:", error);
@@ -99,6 +113,21 @@ export default NextAuth({
               createdAt: new Date(),
               credito: creditoPadrao,
             });
+
+            // Log da criação de usuário via Google
+            await logAction({
+              usuario: user.email,
+              acao: "usuario_criado_google",
+              endpoint: "/api/auth/[...nextauth]",
+              detalhes: {
+                method: "POST",
+                email: user.email,
+                name: user.name,
+                creditoPadrao: creditoPadrao,
+                provider: "google",
+              },
+            });
+
             console.log(
               "[AUTH][GOOGLE] Usuário criado:",
               user.email,
@@ -106,6 +135,20 @@ export default NextAuth({
               creditoPadrao
             );
           } else {
+            // Log do login via Google
+            await logAction({
+              usuario: user.email,
+              acao: "login_sucesso_google",
+              endpoint: "/api/auth/[...nextauth]",
+              detalhes: {
+                method: "POST",
+                email: user.email,
+                name: user.name,
+                creditoAtual: existingUser.credito,
+                provider: "google",
+              },
+            });
+
             console.log(
               "[AUTH][GOOGLE] Usuário já existe:",
               user.email,
@@ -115,6 +158,20 @@ export default NextAuth({
           }
         } catch (error) {
           console.error("Erro ao salvar usuário do Google:", error);
+
+          // Log do erro na autenticação Google
+          await logAction({
+            usuario: user?.email || "sistema",
+            acao: "erro_autenticacao_google",
+            endpoint: "/api/auth/[...nextauth]",
+            detalhes: {
+              method: "POST",
+              email: user?.email,
+              erro: error.message,
+              stack: error.stack,
+              provider: "google",
+            },
+          });
         }
       }
       return true;
