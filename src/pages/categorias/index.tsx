@@ -1,8 +1,10 @@
+import React from "react";
 import Head from "next/head";
 import Navbar from "../../components/Navbar";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import * as GiIcons from "react-icons/gi";
 
 export default function Categorias() {
   const { data: session } = useSession();
@@ -120,7 +122,10 @@ export default function Categorias() {
               }}
             >
               <div style={{ fontSize: "32px", marginBottom: "12px" }}>
-                {c.emoji || "📂"}
+                {c.emoji && GiIcons[c.emoji]
+                  ? // Renderiza o ícone do react-icons pelo nome salvo no campo emoji
+                    React.createElement(GiIcons[c.emoji], { size: 32 })
+                  : "📂"}
               </div>
               <h3 style={{ margin: "0 0 8px 0", color: "#111827" }}>
                 {c.nome}
