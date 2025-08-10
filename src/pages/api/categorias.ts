@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import clientPromise from "../../lib/db";
 import { ObjectId } from "mongodb";
 import { logAction } from "../../lib/logAction";
+import { getSession } from "next-auth/react";
 
 export default async function handler(
   req: NextApiRequest,
@@ -11,11 +12,13 @@ export default async function handler(
   const db = client.db("guia-organico");
   const categorias = db.collection("categorias");
   const produtos = db.collection("produtos");
+  const session = await getSession({ req });
+  const usuarioLogado = session?.user?.email;
 
   if (req.method === "GET") {
     const all = await categorias.find({}).sort({ nome: 1 }).toArray();
     await logAction({
-      usuario: req.query.email || "anon",
+      usuario: usuarioLogado || req.query.email || "anon",
       acao: "GET",
       endpoint: "/api/categorias",
     });
@@ -29,7 +32,7 @@ export default async function handler(
     if (exists) return res.status(409).json({ error: "Categoria já existe" });
     const result = await categorias.insertOne({ nome });
     await logAction({
-      usuario: req.body.email || "anon",
+      usuario: usuarioLogado || req.body.email || "anon",
       acao: "POST",
       endpoint: "/api/categorias",
       detalhes: req.body,
@@ -39,7 +42,7 @@ export default async function handler(
 
   if (req.method === "PUT") {
     await logAction({
-      usuario: req.body.email || "anon",
+      usuario: usuarioLogado || req.body.email || "anon",
       acao: "PUT",
       endpoint: "/api/categorias",
       detalhes: req.body,
@@ -55,7 +58,7 @@ export default async function handler(
 
   if (req.method === "DELETE") {
     await logAction({
-      usuario: req.body.email || "anon",
+      usuario: usuarioLogado || req.body.email || "anon",
       acao: "DELETE",
       endpoint: "/api/categorias",
       detalhes: req.body,

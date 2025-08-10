@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import clientPromise from "../../lib/db";
 import { ObjectId } from "mongodb";
 import { logAction } from "../../lib/logAction";
+import { getSession } from "next-auth/react";
 
 export default async function handler(
   req: NextApiRequest,
@@ -12,6 +13,8 @@ export default async function handler(
   console.log("[API][usuarios] Conectado ao MongoDB");
   const db = client.db();
   const collection = db.collection("users");
+  const session = await getSession({ req });
+  const usuarioLogado = session?.user?.email;
 
   if (req.method === "GET") {
     // Listar todos os usuários
@@ -19,7 +22,7 @@ export default async function handler(
     const usuarios = await collection.find({}).toArray();
     console.log("[API][usuarios][GET] Usuários encontrados:", usuarios);
     await logAction({
-      usuario: req.query.email || "anon",
+      usuario: usuarioLogado || req.query.email || "anon",
       acao: "GET",
       endpoint: "/api/usuarios",
     });
@@ -36,7 +39,7 @@ export default async function handler(
     );
     console.log("[API][usuarios][PUT] Resultado do update:", result);
     await logAction({
-      usuario: req.body.email || "anon",
+      usuario: usuarioLogado || req.body.email || "anon",
       acao: "PUT",
       endpoint: "/api/usuarios",
       detalhes: req.body,
@@ -58,7 +61,7 @@ export default async function handler(
       pedidosDeleteResult
     );
     await logAction({
-      usuario: req.body.email || "anon",
+      usuario: usuarioLogado || req.body.email || "anon",
       acao: "DELETE",
       endpoint: "/api/usuarios",
       detalhes: req.body,
@@ -73,7 +76,7 @@ export default async function handler(
     const result = await collection.insertOne({ nome, email, senha });
     console.log("[API][usuarios][POST] Usuário criado:", result);
     await logAction({
-      usuario: req.body.email || "anon",
+      usuario: usuarioLogado || req.body.email || "anon",
       acao: "POST",
       endpoint: "/api/usuarios",
       detalhes: req.body,
