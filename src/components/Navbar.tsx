@@ -16,12 +16,14 @@ export default function Navbar() {
   useEffect(() => {
     async function fetchDados() {
       try {
-        const [resPedidos, resLimite, resUsuario, resCiclo] = await Promise.all([
-          fetch(`/api/pedidos?email=${session?.user?.email}`),
-          fetch(`/api/configuracoes`),
-          fetch(`/api/usuarios`),
-          fetch(`/api/ciclo`),
-        ]);
+        const [resPedidos, resLimite, resUsuario, resCiclo] = await Promise.all(
+          [
+            fetch(`/api/pedidos?email=${session?.user?.email}`),
+            fetch(`/api/configuracoes`),
+            fetch(`/api/usuarios`),
+            fetch(`/api/ciclo`),
+          ]
+        );
 
         const pedidosData = await resPedidos.json();
         const limiteData = await resLimite.json();

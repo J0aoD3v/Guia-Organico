@@ -137,11 +137,20 @@ export default function Home() {
                 style={{
                   marginTop: "10px",
                   padding: "8px 16px",
-                  backgroundColor: creditosUsuario !== null && creditosUsuario <= 0 ? "#f3f4f6" : "#10b981",
-                  color: creditosUsuario !== null && creditosUsuario <= 0 ? "#a1a1aa" : "white",
+                  backgroundColor:
+                    creditosUsuario !== null && creditosUsuario <= 0
+                      ? "#f3f4f6"
+                      : "#10b981",
+                  color:
+                    creditosUsuario !== null && creditosUsuario <= 0
+                      ? "#a1a1aa"
+                      : "white",
                   border: "none",
                   borderRadius: "4px",
-                  cursor: creditosUsuario !== null && creditosUsuario <= 0 ? "not-allowed" : "pointer",
+                  cursor:
+                    creditosUsuario !== null && creditosUsuario <= 0
+                      ? "not-allowed"
+                      : "pointer",
                 }}
                 disabled={creditosUsuario !== null && creditosUsuario <= 0}
               >

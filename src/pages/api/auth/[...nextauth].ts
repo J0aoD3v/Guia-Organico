@@ -113,8 +113,20 @@ export default NextAuth({
               createdAt: new Date(),
               credito: creditoPadrao,
             });
+            console.log(
+              "[AUTH][GOOGLE] Usuário criado:",
+              user.email,
+              "Crédito:",
+              creditoPadrao
+            );
+          } else {
+            console.log(
+              "[AUTH][GOOGLE] Usuário já existe:",
+              user.email,
+              "Crédito atual:",
+              existingUser.credito
+            );
           }
-          // Se já existe, não altera o crédito!
         } catch (error) {
           console.error("Erro ao salvar usuário do Google:", error);
         }
