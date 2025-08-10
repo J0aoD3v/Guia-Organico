@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import clientPromise from "../../lib/db";
 import { ObjectId } from "mongodb";
+import { logAction } from "../../lib/logAction";
 
 export default async function handler(
   req: NextApiRequest,
@@ -17,6 +18,11 @@ export default async function handler(
     console.log("[API][usuarios][GET] Buscando todos os usuários...");
     const usuarios = await collection.find({}).toArray();
     console.log("[API][usuarios][GET] Usuários encontrados:", usuarios);
+    await logAction({
+      usuario: req.query.email || "anon",
+      acao: "GET",
+      endpoint: "/api/usuarios",
+    });
     return res.status(200).json(usuarios);
   }
 
@@ -29,6 +35,12 @@ export default async function handler(
       { $set: { credito } }
     );
     console.log("[API][usuarios][PUT] Resultado do update:", result);
+    await logAction({
+      usuario: req.body.email || "anon",
+      acao: "PUT",
+      endpoint: "/api/usuarios",
+      detalhes: req.body,
+    });
     return res.status(200).json({ success: true });
   }
 
@@ -45,7 +57,28 @@ export default async function handler(
       "[API][usuarios][DELETE] Pedidos deletados:",
       pedidosDeleteResult
     );
+    await logAction({
+      usuario: req.body.email || "anon",
+      acao: "DELETE",
+      endpoint: "/api/usuarios",
+      detalhes: req.body,
+    });
     return res.status(200).json({ success: true });
+  }
+
+  if (req.method === "POST") {
+    // Criar novo usuário
+    console.log("[API][usuarios][POST] Dados recebidos:", req.body);
+    const { nome, email, senha } = req.body;
+    const result = await collection.insertOne({ nome, email, senha });
+    console.log("[API][usuarios][POST] Usuário criado:", result);
+    await logAction({
+      usuario: req.body.email || "anon",
+      acao: "POST",
+      endpoint: "/api/usuarios",
+      detalhes: req.body,
+    });
+    return res.status(201).json({ success: true, id: result.insertedId });
   }
 
   res.status(405).end();

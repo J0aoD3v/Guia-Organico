@@ -277,7 +277,7 @@ export default function UserAvatar() {
             <button
               onClick={() => {
                 setIsOpen(false);
-                signOut();
+                signOut({ callbackUrl: "/" });
               }}
               style={{
                 width: "100%",

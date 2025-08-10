@@ -64,6 +64,22 @@ export default function RelatoriosAdmin() {
     }
   }
 
+  // Remove lógica antiga do relatório mensal
+  // Novo relatório: log de todas as ações do banco
+  async function gerarRelatorioMensal() {
+    setRelatorioLoading(true);
+    setErro("");
+    try {
+      const res = await fetch("/api/relatorios/logs");
+      const data = await res.json();
+      setHistorico(data);
+    } catch (err) {
+      setErro("Erro ao buscar relatório de logs");
+    } finally {
+      setRelatorioLoading(false);
+    }
+  }
+
   if (status === "loading" || loading) {
     return (
       <div>
@@ -310,7 +326,7 @@ export default function RelatoriosAdmin() {
                 fontSize: "14px",
                 width: "100%",
               }}
-              onClick={gerarRelatorio}
+              onClick={gerarRelatorioMensal}
             >
               Gerar Relatório
             </button>
@@ -354,34 +370,30 @@ export default function RelatoriosAdmin() {
                     <th
                       style={{ padding: 10, borderBottom: "1px solid #e5e7eb" }}
                     >
-                      Email
+                      Ação
                     </th>
                     <th
                       style={{ padding: 10, borderBottom: "1px solid #e5e7eb" }}
                     >
-                      Créditos
+                      Endpoint
                     </th>
                     <th
                       style={{ padding: 10, borderBottom: "1px solid #e5e7eb" }}
                     >
-                      Solicitações no mês
-                    </th>
-                    <th
-                      style={{ padding: 10, borderBottom: "1px solid #e5e7eb" }}
-                    >
-                      Ciclo
+                      Timestamp
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {historico.map((h, idx) => (
+                  {historico.map((log, idx) => (
                     <tr key={idx} style={{ borderBottom: "1px solid #e5e7eb" }}>
-                      <td style={{ padding: 10 }}>{h.nome || h.email}</td>
-                      <td style={{ padding: 10 }}>{h.email}</td>
-                      <td style={{ padding: 10 }}>{h.credito}</td>
-                      <td style={{ padding: 10 }}>{h.solicitacoesMes}</td>
                       <td style={{ padding: 10 }}>
-                        {new Date(h.ciclo).toLocaleDateString("pt-BR")}
+                        {log.usuario || log.email || "-"}
+                      </td>
+                      <td style={{ padding: 10 }}>{log.acao}</td>
+                      <td style={{ padding: 10 }}>{log.endpoint}</td>
+                      <td style={{ padding: 10 }}>
+                        {new Date(log.timestamp).toLocaleString("pt-BR")}
                       </td>
                     </tr>
                   ))}

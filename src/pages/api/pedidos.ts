@@ -2,6 +2,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import clientPromise from "../../lib/db";
 import { ObjectId } from "mongodb";
 import formidable from "formidable";
+import { logAction } from "../../lib/logAction";
+import { getSession } from "next-auth/react";
 
 export const config = {
   api: {
@@ -46,6 +48,10 @@ export default async function handler(
 ) {
   console.log("🚀 [API] Iniciando handler pedidos:", req.method);
 
+  // Recupera sessão do usuário
+  const session = await getSession({ req });
+  const usuarioLogado = session?.user?.email;
+
   try {
     const client = await clientPromise;
     const db = client.db("guia-organico");
@@ -54,21 +60,24 @@ export default async function handler(
 
     if (req.method === "GET") {
       const { email, status, categoria } = req.query;
+      // Se email, retorna todos os pedidos do usuário
       if (email) {
-        const now = new Date();
-        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        const count = await pedidos.countDocuments({
-          email,
-          createdAt: { $gte: firstDay, $lte: lastDay },
-        });
-        return res.status(200).json({ count });
+        const pedidosUsuario = await pedidos
+          .find({ email })
+          .sort({ createdAt: -1 })
+          .toArray();
+        return res.status(200).json(pedidosUsuario);
       }
       // Monta filtro dinâmico
       const filtro: any = {};
       if (status) filtro.status = status;
       if (categoria) filtro.categoria = categoria;
       const all = await pedidos.find(filtro).sort({ createdAt: -1 }).toArray();
+      await logAction({
+        usuario: usuarioLogado || req.query.email || "anon",
+        acao: "GET",
+        endpoint: "/api/pedidos",
+      });
       return res.status(200).json(all);
     }
 
@@ -117,7 +126,6 @@ export default async function handler(
         );
 
         const pedido = {
-          // ...existing code...
           email: Array.isArray(fields.email) ? fields.email[0] : fields.email,
           nome: Array.isArray(fields.nome) ? fields.nome[0] : fields.nome,
           fabricante: Array.isArray(fields.fabricante)
@@ -190,6 +198,13 @@ export default async function handler(
           console.log(`⚠️ Usuário não encontrado: ${pedido.email}`);
         }
 
+        await logAction({
+          usuario: usuarioLogado || fields.email || "anon",
+          acao: "POST",
+          endpoint: "/api/pedidos",
+          detalhes: fields,
+        });
+
         return res.status(201).json({ ok: true, id: result.insertedId });
       } catch (err) {
         console.error("❌ [API] Erro no POST:", err);
@@ -201,6 +216,12 @@ export default async function handler(
     }
 
     if (req.method === "DELETE") {
+      await logAction({
+        usuario: usuarioLogado || req.body?.email || "anon",
+        acao: "DELETE",
+        endpoint: "/api/pedidos",
+        detalhes: req.body,
+      });
       try {
         const body = await readJsonBody(req);
         const { id } = body;
@@ -224,6 +245,12 @@ export default async function handler(
     }
 
     if (req.method === "PUT") {
+      await logAction({
+        usuario: usuarioLogado || req.body?.email || "anon",
+        acao: "PUT",
+        endpoint: "/api/pedidos",
+        detalhes: req.body,
+      });
       try {
         const body = await readJsonBody(req);
         const { id, action, motivo } = body;

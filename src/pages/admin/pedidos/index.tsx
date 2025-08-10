@@ -520,7 +520,35 @@ export default function PedidosAdmin() {
                         </span>
                       </td>
                       <td style={{ padding: 10 }}>
-                        <span style={{ fontWeight: "500" }}>
+                        <span
+                          style={{
+                            fontWeight: "500",
+                            cursor:
+                              p.status === "rejeitado" && p.motivoRejeicao
+                                ? "help"
+                                : "default",
+                            background:
+                              p.status === "rejeitado"
+                                ? "#fee2e2"
+                                : p.status === "aprovado"
+                                ? "#d1fae5"
+                                : undefined,
+                            color:
+                              p.status === "rejeitado"
+                                ? "#b91c1c"
+                                : p.status === "aprovado"
+                                ? "#065f46"
+                                : undefined,
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            fontSize: "12px",
+                          }}
+                          title={
+                            p.status === "rejeitado" && p.motivoRejeicao
+                              ? `Motivo: ${p.motivoRejeicao}`
+                              : ""
+                          }
+                        >
                           {p.status || "-"}
                         </span>
                       </td>

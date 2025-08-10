@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import clientPromise from "../../lib/db";
 import { ObjectId } from "mongodb";
+import { logAction } from "../../lib/logAction";
 
 export default async function handler(
   req: NextApiRequest,
@@ -13,6 +14,11 @@ export default async function handler(
 
   if (req.method === "GET") {
     const all = await categorias.find({}).sort({ nome: 1 }).toArray();
+    await logAction({
+      usuario: req.query.email || "anon",
+      acao: "GET",
+      endpoint: "/api/categorias",
+    });
     return res.status(200).json(all);
   }
 
@@ -22,10 +28,22 @@ export default async function handler(
     const exists = await categorias.findOne({ nome });
     if (exists) return res.status(409).json({ error: "Categoria já existe" });
     const result = await categorias.insertOne({ nome });
+    await logAction({
+      usuario: req.body.email || "anon",
+      acao: "POST",
+      endpoint: "/api/categorias",
+      detalhes: req.body,
+    });
     return res.status(201).json({ ok: true, id: result.insertedId });
   }
 
   if (req.method === "PUT") {
+    await logAction({
+      usuario: req.body.email || "anon",
+      acao: "PUT",
+      endpoint: "/api/categorias",
+      detalhes: req.body,
+    });
     const { nome, emoji } = req.body;
     if (!nome || !emoji)
       return res.status(400).json({ error: "Nome e emoji obrigatórios" });
@@ -36,6 +54,12 @@ export default async function handler(
   }
 
   if (req.method === "DELETE") {
+    await logAction({
+      usuario: req.body.email || "anon",
+      acao: "DELETE",
+      endpoint: "/api/categorias",
+      detalhes: req.body,
+    });
     const { id } = req.body;
     if (!id) return res.status(400).json({ error: "ID obrigatório" });
     const categoria = await categorias.findOne({ _id: new ObjectId(id) });
