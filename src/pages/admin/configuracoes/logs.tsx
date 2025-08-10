@@ -52,7 +52,6 @@ export default function VisualizarLogs() {
           <div
             style={{
               background: "#27272a",
-              borderRadius: 12,
               boxShadow: "0 2px 16px #0002",
               padding: 0,
               width: "100%",
@@ -67,12 +66,10 @@ export default function VisualizarLogs() {
                 color: "#22d3ee",
                 fontFamily: "'Jersey 10'",
                 fontSize: 40,
+                padding: "8px 24px",
                 margin: 0,
-                padding: "24px 32px",
                 borderBottom: "1px solid #222",
                 textAlign: "center",
-                borderTopLeftRadius: 12,
-                borderTopRightRadius: 12,
               }}
             >
               📋 Logs do Sistema
@@ -100,11 +97,9 @@ export default function VisualizarLogs() {
                     background: "#18181b",
                     color: "#22c55e",
                     padding: 30,
-                    borderRadius: "0 0 12px 12px",
                     fontSize: 30,
                     overflow: "auto",
                     maxHeight: 400,
-                    minHeight: 400,
                     margin: 0,
                     width: "100%",
                     boxSizing: "border-box",

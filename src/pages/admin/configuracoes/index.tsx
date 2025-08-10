@@ -300,24 +300,6 @@ export default function ConfiguracoesAdmin() {
           >
             <button
               style={{
-                background: "#3b82f6",
-                color: "white",
-                border: "none",
-                padding: "12px 16px",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontSize: "14px",
-                textAlign: "left",
-              }}
-              onClick={() =>
-                alert("Cache limpo com sucesso! (em desenvolvimento)")
-              }
-            >
-              🗑️ Limpar Cache do Sistema
-            </button>
-
-            <button
-              style={{
                 background: "#f59e0b",
                 color: "white",
                 border: "none",
@@ -362,12 +344,13 @@ export default function ConfiguracoesAdmin() {
               style={{
                 background: "#ef4444",
                 color: "white",
-                padding: "10px 16px",
+                padding: "12px 16px",
                 borderRadius: 6,
                 border: "none",
                 cursor: "pointer",
                 fontWeight: 600,
-                marginTop: 16,
+                fontSize: "14px",
+                textAlign: "left",
               }}
               onClick={limparLogs}
             >
@@ -378,12 +361,13 @@ export default function ConfiguracoesAdmin() {
               style={{
                 background: "#22d3ee",
                 color: "white",
-                padding: "10px 16px",
+                padding: "12px 16px",
                 borderRadius: 6,
                 border: "none",
                 cursor: "pointer",
                 fontWeight: 600,
-                marginTop: 16,
+                fontSize: "14px",
+                textAlign: "left",
               }}
               onClick={() => router.push("/admin/configuracoes/logs")}
             >
