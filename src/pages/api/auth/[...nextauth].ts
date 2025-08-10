@@ -27,7 +27,6 @@ export default NextAuth({
           return null;
         }
 
-
         try {
           const client = await clientPromise;
           const db = client.db("guia-organico");
