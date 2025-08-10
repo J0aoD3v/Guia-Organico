@@ -198,31 +198,17 @@ export default function UserAvatar() {
                 width: "100%",
                 padding: "8px 16px",
                 textAlign: "left",
-                backgroundColor:
-                  creditosUsuario !== null && creditosUsuario <= 0
-                    ? "#f3f4f6"
-                    : "transparent",
+                backgroundColor: "transparent",
                 border: "none",
-                cursor:
-                  creditosUsuario !== null && creditosUsuario <= 0
-                    ? "not-allowed"
-                    : "pointer",
+                cursor: "pointer",
                 fontSize: "14px",
-                color:
-                  creditosUsuario !== null && creditosUsuario <= 0
-                    ? "#a1a1aa"
-                    : "#374151",
+                color: "#374151",
               }}
-              disabled={creditosUsuario !== null && creditosUsuario <= 0}
               onMouseEnter={(e) => {
-                if (!(creditosUsuario !== null && creditosUsuario <= 0))
-                  e.currentTarget.style.backgroundColor = "#f3f4f6";
+                e.currentTarget.style.backgroundColor = "#f3f4f6";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  creditosUsuario !== null && creditosUsuario <= 0
-                    ? "#f3f4f6"
-                    : "transparent";
+                e.currentTarget.style.backgroundColor = "transparent";
               }}
             >
               👤 Ver Perfil
@@ -237,31 +223,17 @@ export default function UserAvatar() {
                 width: "100%",
                 padding: "8px 16px",
                 textAlign: "left",
-                backgroundColor:
-                  creditosUsuario !== null && creditosUsuario <= 0
-                    ? "#f3f4f6"
-                    : "transparent",
+                backgroundColor: "transparent",
                 border: "none",
-                cursor:
-                  creditosUsuario !== null && creditosUsuario <= 0
-                    ? "not-allowed"
-                    : "pointer",
+                cursor: "pointer",
                 fontSize: "14px",
-                color:
-                  creditosUsuario !== null && creditosUsuario <= 0
-                    ? "#a1a1aa"
-                    : "#374151",
+                color: "#374151",
               }}
-              disabled={creditosUsuario !== null && creditosUsuario <= 0}
               onMouseEnter={(e) => {
-                if (!(creditosUsuario !== null && creditosUsuario <= 0))
-                  e.currentTarget.style.backgroundColor = "#f3f4f6";
+                e.currentTarget.style.backgroundColor = "#f3f4f6";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  creditosUsuario !== null && creditosUsuario <= 0
-                    ? "#f3f4f6"
-                    : "transparent";
+                e.currentTarget.style.backgroundColor = "transparent";
               }}
             >
               📦 Ver meus pedidos

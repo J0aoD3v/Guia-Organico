@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Navbar from "../../components/Navbar";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 
 const categorias = [
@@ -29,6 +29,30 @@ const categorias = [
 
 export default function Categorias() {
   const { data: session } = useSession();
+  const [creditosUsuario, setCreditosUsuario] = useState<number | null>(null);
+  const [proximoCiclo, setProximoCiclo] = useState<string>("");
+
+  useEffect(() => {
+    async function fetchDados() {
+      try {
+        const [resUsuario, resCiclo] = await Promise.all([
+          fetch(`/api/usuarios`),
+          fetch(`/api/ciclo`),
+        ]);
+        const usuariosData = await resUsuario.json();
+        const cicloData = await resCiclo.json();
+        const usuarioAtual = usuariosData.find(
+          (u: any) => u.email === session?.user?.email
+        );
+        setCreditosUsuario(usuarioAtual?.credito ?? null);
+        setProximoCiclo(cicloData.proximoCiclo ?? "");
+      } catch (err) {
+        setCreditosUsuario(null);
+        setProximoCiclo("");
+      }
+    }
+    if (session) fetchDados();
+  }, [session]);
 
   useEffect(() => {
     async function fetchDados() {
@@ -158,18 +182,41 @@ export default function Categorias() {
               🔍 Buscar por texto
             </Link>
             <Link
-              href="/pedidos/novo"
+              href={
+                creditosUsuario !== null && creditosUsuario <= 0
+                  ? "#"
+                  : "/pedidos/novo"
+              }
               style={{
                 padding: "8px 16px",
-                backgroundColor: "#10b981",
-                color: "white",
+                backgroundColor:
+                  creditosUsuario !== null && creditosUsuario <= 0
+                    ? "#f3f4f6"
+                    : "#10b981",
+                color:
+                  creditosUsuario !== null && creditosUsuario <= 0
+                    ? "#a1a1aa"
+                    : "white",
                 textDecoration: "none",
                 borderRadius: "6px",
                 fontSize: "14px",
-                cursor: "pointer",
+                cursor:
+                  creditosUsuario !== null && creditosUsuario <= 0
+                    ? "not-allowed"
+                    : "pointer",
+                pointerEvents:
+                  creditosUsuario !== null && creditosUsuario <= 0
+                    ? "none"
+                    : "auto",
               }}
             >
-              📋 Solicitar novo insumo
+              {creditosUsuario !== null && creditosUsuario <= 0 ? (
+                <span>
+                  Bloqueado até <b>{proximoCiclo}</b>
+                </span>
+              ) : (
+                "📋 Solicitar novo insumo"
+              )}
             </Link>
           </div>
         </div>
