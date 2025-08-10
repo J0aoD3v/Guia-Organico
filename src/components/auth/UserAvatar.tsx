@@ -10,21 +10,24 @@ export default function UserAvatar() {
   const [pedidosMes, setPedidosMes] = useState<number | null>(null);
   const [creditosUsuario, setCreditosUsuario] = useState<number | null>(null);
   const [creditosGlobais, setCreditosGlobais] = useState<number | null>(null);
+  const [proximoCiclo, setProximoCiclo] = useState<string>("");
 
   // Buscar créditos do usuário e créditos globais
   useEffect(() => {
     async function fetchDados() {
       if (session?.user?.email) {
         try {
-          const [resPedidos, resConfig, resUsuario] = await Promise.all([
+          const [resPedidos, resConfig, resUsuario, resCiclo] = await Promise.all([
             fetch(`/api/pedidos?email=${session.user.email}`),
             fetch(`/api/configuracoes`),
             fetch(`/api/usuarios`),
+            fetch(`/api/ciclo`),
           ]);
 
           const pedidosData = await resPedidos.json();
           const configData = await resConfig.json();
           const usuariosData = await resUsuario.json();
+          const cicloData = await resCiclo.json();
           const usuarioAtual = usuariosData.find(
             (u: any) => u.email === session.user.email
           );
@@ -32,10 +35,12 @@ export default function UserAvatar() {
           setPedidosMes(pedidosData.count ?? 0);
           setCreditosGlobais(configData.creditoPadrao ?? 0);
           setCreditosUsuario(usuarioAtual?.credito ?? 0);
+          setProximoCiclo(cicloData.proximoCiclo ?? "");
         } catch (err) {
           setPedidosMes(null);
           setCreditosGlobais(null);
           setCreditosUsuario(null);
+          setProximoCiclo("");
         }
       }
     }
@@ -101,7 +106,7 @@ export default function UserAvatar() {
   const userInitials = userName.charAt(0).toUpperCase();
 
   return (
-    <div style={{ position: "relative" }} ref={dropdownRef}>
+  <div style={{ position: "relative" }} ref={dropdownRef}>
       {/* Avatar */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -192,17 +197,18 @@ export default function UserAvatar() {
                 width: "100%",
                 padding: "8px 16px",
                 textAlign: "left",
-                backgroundColor: "transparent",
+                backgroundColor: creditosUsuario !== null && creditosUsuario <= 0 ? "#f3f4f6" : "transparent",
                 border: "none",
-                cursor: "pointer",
+                cursor: creditosUsuario !== null && creditosUsuario <= 0 ? "not-allowed" : "pointer",
                 fontSize: "14px",
-                color: "#374151",
+                color: creditosUsuario !== null && creditosUsuario <= 0 ? "#a1a1aa" : "#374151",
               }}
+              disabled={creditosUsuario !== null && creditosUsuario <= 0}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#f3f4f6";
+                if (!(creditosUsuario !== null && creditosUsuario <= 0)) e.currentTarget.style.backgroundColor = "#f3f4f6";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.backgroundColor = creditosUsuario !== null && creditosUsuario <= 0 ? "#f3f4f6" : "transparent";
               }}
             >
               👤 Ver Perfil
@@ -217,17 +223,18 @@ export default function UserAvatar() {
                 width: "100%",
                 padding: "8px 16px",
                 textAlign: "left",
-                backgroundColor: "transparent",
+                backgroundColor: creditosUsuario !== null && creditosUsuario <= 0 ? "#f3f4f6" : "transparent",
                 border: "none",
-                cursor: "pointer",
+                cursor: creditosUsuario !== null && creditosUsuario <= 0 ? "not-allowed" : "pointer",
                 fontSize: "14px",
-                color: "#374151",
+                color: creditosUsuario !== null && creditosUsuario <= 0 ? "#a1a1aa" : "#374151",
               }}
+              disabled={creditosUsuario !== null && creditosUsuario <= 0}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#f3f4f6";
+                if (!(creditosUsuario !== null && creditosUsuario <= 0)) e.currentTarget.style.backgroundColor = "#f3f4f6";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.backgroundColor = creditosUsuario !== null && creditosUsuario <= 0 ? "#f3f4f6" : "transparent";
               }}
             >
               📦 Ver meus pedidos
@@ -303,9 +310,18 @@ export default function UserAvatar() {
                 textAlign: "center",
               }}
             >
-              {creditosUsuario !== null && creditosGlobais !== null
-                ? `Créditos: ${creditosUsuario} / ${creditosGlobais}`
-                : "Carregando créditos..."}
+              {creditosUsuario !== null && creditosGlobais !== null ? (
+                creditosUsuario > 0 ? (
+                  `Créditos: ${creditosUsuario} / ${creditosGlobais}`
+                ) : (
+                  <span>
+                    Créditos esgotados.<br />
+                    Próximo ciclo: <b>{proximoCiclo}</b>
+                  </span>
+                )
+              ) : (
+                "Carregando créditos..."
+              )}
             </div>
           </div>
         </div>

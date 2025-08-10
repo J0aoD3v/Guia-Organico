@@ -8,6 +8,7 @@ export default function Home() {
   const { data: session } = useSession();
   const [pedidosMes, setPedidosMes] = useState<number | null>(null);
   const [proximoCiclo, setProximoCiclo] = useState<string>("");
+  const [creditosUsuario, setCreditosUsuario] = useState<number | null>(null);
 
   useEffect(() => {
     async function fetchDados() {
@@ -27,6 +28,7 @@ export default function Home() {
 
         setPedidosMes(pedidosData.count ?? 0);
         setProximoCiclo(cicloData.proximoCiclo ?? "");
+        setCreditosUsuario(usuarioAtual?.credito ?? null);
       } catch (err) {
         console.error("Erro ao buscar dados de pedidos:", err);
       }
@@ -135,14 +137,21 @@ export default function Home() {
                 style={{
                   marginTop: "10px",
                   padding: "8px 16px",
-                  backgroundColor: "#10b981",
-                  color: "white",
+                  backgroundColor: creditosUsuario !== null && creditosUsuario <= 0 ? "#f3f4f6" : "#10b981",
+                  color: creditosUsuario !== null && creditosUsuario <= 0 ? "#a1a1aa" : "white",
                   border: "none",
                   borderRadius: "4px",
-                  cursor: "pointer",
+                  cursor: creditosUsuario !== null && creditosUsuario <= 0 ? "not-allowed" : "pointer",
                 }}
+                disabled={creditosUsuario !== null && creditosUsuario <= 0}
               >
-                Solicitar Agora
+                {creditosUsuario !== null && creditosUsuario <= 0 ? (
+                  <span>
+                    Bloqueado até <b>{proximoCiclo}</b>
+                  </span>
+                ) : (
+                  "Solicitar Agora"
+                )}
               </button>
             </div>
 

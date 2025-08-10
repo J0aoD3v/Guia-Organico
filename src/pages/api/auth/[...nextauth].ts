@@ -113,22 +113,8 @@ export default NextAuth({
               createdAt: new Date(),
               credito: creditoPadrao,
             });
-          } else {
-            // Se o usuário já existe, garantir que o crédito está correto
-            if (
-              existingUser.credito === undefined ||
-              existingUser.credito === null ||
-              Number(existingUser.credito) <= 0 ||
-              isNaN(Number(existingUser.credito))
-            ) {
-              await db
-                .collection("users")
-                .updateOne(
-                  { _id: existingUser._id },
-                  { $set: { credito: creditoPadrao } }
-                );
-            }
           }
+          // Se já existe, não altera o crédito!
         } catch (error) {
           console.error("Erro ao salvar usuário do Google:", error);
         }
