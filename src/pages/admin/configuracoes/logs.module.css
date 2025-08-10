@@ -1,0 +1,13 @@
+.consoleLog::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+  border-radius: 8px;
+}
+.consoleLog::-webkit-scrollbar-thumb {
+  background: #22c55e;
+  border-radius: 8px;
+  border: none;
+}
+.consoleLog::-webkit-scrollbar-button {
+  display: none;
+}

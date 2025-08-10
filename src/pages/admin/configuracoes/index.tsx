@@ -58,6 +58,21 @@ export default function ConfiguracoesAdmin() {
     }
   };
 
+  const limparLogs = async () => {
+    if (!confirm("Tem certeza que deseja limpar todos os logs do sistema?"))
+      return;
+    try {
+      const res = await fetch("/api/logs/clear", { method: "POST" });
+      if (res.ok) {
+        alert("Logs do sistema limpos com sucesso!");
+      } else {
+        alert("Erro ao limpar logs.");
+      }
+    } catch (err) {
+      alert("Erro ao limpar logs.");
+    }
+  };
+
   return (
     <div>
       <Navbar />
@@ -321,22 +336,6 @@ export default function ConfiguracoesAdmin() {
 
             <button
               style={{
-                background: "#8b5cf6",
-                color: "white",
-                border: "none",
-                padding: "12px 16px",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontSize: "14px",
-                textAlign: "left",
-              }}
-              onClick={() => alert("Logs visualizados (em desenvolvimento)")}
-            >
-              📋 Visualizar Logs do Sistema
-            </button>
-
-            <button
-              style={{
                 background: "#ef4444",
                 color: "white",
                 border: "none",
@@ -357,6 +356,38 @@ export default function ConfiguracoesAdmin() {
               }}
             >
               🔄 Reiniciar Sistema
+            </button>
+
+            <button
+              style={{
+                background: "#ef4444",
+                color: "white",
+                padding: "10px 16px",
+                borderRadius: 6,
+                border: "none",
+                cursor: "pointer",
+                fontWeight: 600,
+                marginTop: 16,
+              }}
+              onClick={limparLogs}
+            >
+              🧹 Limpar Cache/Logs do Sistema
+            </button>
+
+            <button
+              style={{
+                background: "#22d3ee",
+                color: "white",
+                padding: "10px 16px",
+                borderRadius: 6,
+                border: "none",
+                cursor: "pointer",
+                fontWeight: 600,
+                marginTop: 16,
+              }}
+              onClick={() => router.push("/admin/configuracoes/logs")}
+            >
+              📋 Visualizar Logs do Sistema
             </button>
           </div>
         </div>
