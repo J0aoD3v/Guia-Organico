@@ -2,7 +2,10 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import clientPromise from "../../lib/db";
 import { ObjectId } from "mongodb";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   const client = await clientPromise;
   const db = client.db("guia-organico");
   const categorias = db.collection("categorias");
@@ -26,7 +29,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { id } = req.body;
     if (!id) return res.status(400).json({ error: "ID obrigatório" });
     const categoria = await categorias.findOne({ _id: new ObjectId(id) });
-    if (!categoria) return res.status(404).json({ error: "Categoria não encontrada" });
+    if (!categoria)
+      return res.status(404).json({ error: "Categoria não encontrada" });
     await categorias.deleteOne({ _id: new ObjectId(id) });
     await produtos.deleteMany({ categoria: categoria.nome });
     return res.status(200).json({ ok: true });
