@@ -37,6 +37,8 @@ export default function PedidosAdmin() {
   const router = useRouter();
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [statusFiltro, setStatusFiltro] = useState("");
+  const [categoriaFiltro, setCategoriaFiltro] = useState("");
 
   useEffect(() => {
     if (status === "loading") return;
@@ -51,7 +53,11 @@ export default function PedidosAdmin() {
 
   const fetchPedidos = async () => {
     try {
-      const res = await fetch("/api/pedidos");
+      const queryParams = new URLSearchParams();
+      if (statusFiltro) queryParams.append("status", statusFiltro);
+      if (categoriaFiltro) queryParams.append("categoria", categoriaFiltro);
+
+      const res = await fetch(`/api/pedidos?${queryParams.toString()}`);
       const data = await res.json();
       setPedidos(data);
     } catch (error) {
@@ -304,6 +310,8 @@ export default function PedidosAdmin() {
             Filtrar por:
           </label>
           <select
+            value={statusFiltro}
+            onChange={(e) => setStatusFiltro(e.target.value)}
             style={{
               padding: "8px 12px",
               borderRadius: "6px",
@@ -317,6 +325,8 @@ export default function PedidosAdmin() {
             <option value="rejeitado">Rejeitados</option>
           </select>
           <select
+            value={categoriaFiltro}
+            onChange={(e) => setCategoriaFiltro(e.target.value)}
             style={{
               padding: "8px 12px",
               borderRadius: "6px",
