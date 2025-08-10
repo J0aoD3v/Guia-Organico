@@ -19,9 +19,12 @@ export default async function handler(
 
     // Salvar histórico dos usuários antes de zerar
     const cicloAtual = new Date();
-    const usuarios = await db.collection("users").find({ role: { $ne: "admin" } }).toArray();
+    const usuarios = await db
+      .collection("users")
+      .find({ role: { $ne: "admin" } })
+      .toArray();
     if (usuarios.length > 0) {
-      const historico = usuarios.map(u => ({
+      const historico = usuarios.map((u) => ({
         usuarioId: u._id,
         email: u.email,
         nome: u.name,
