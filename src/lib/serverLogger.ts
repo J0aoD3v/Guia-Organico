@@ -48,7 +48,8 @@ async function saveServerLog(level: string, args: any[]) {
             return String(arg);
           }
         }
-        return String(arg);
+        const argStr = String(arg);
+        return argStr;
       })
       .join(" ");
 

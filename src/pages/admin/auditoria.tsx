@@ -2,6 +2,22 @@ import { useEffect, useState, useRef } from "react";
 import Navbar from "../../components/Navbar";
 import Head from "next/head";
 import styles from "./auditoria.module.css";
+import Convert from "ansi-to-html";
+
+// Inicializar conversor ANSI
+const convert = new Convert({
+  fg: "#ffffff",
+  bg: "#18181b",
+  newline: false,
+  escapeXML: false,
+  stream: false,
+});
+
+// Função para converter códigos ANSI em HTML colorido
+function convertAnsiToHtml(text: string): string {
+  if (!text) return text;
+  return convert.toHtml(text);
+}
 
 // Componente para exibir JSON expandível
 function ExpandableJson({
@@ -202,7 +218,7 @@ export default function AuditoriaLogs() {
               style={{
                 color: "#22d3ee",
                 fontFamily: "'Cascadia Code', monospace",
-                fontSize: 40,
+                fontSize: 30,
                 padding: "8px 24px",
                 margin: 0,
                 borderBottom: "1px solid #222",
@@ -227,7 +243,7 @@ export default function AuditoriaLogs() {
                 style={{
                   color: "#22d3ee",
                   fontFamily: "'Cascadia Code', monospace",
-                  fontSize: 22,
+                  fontSize: 18,
                   display: "flex",
                   alignItems: "center",
                   gap: 10,
@@ -244,7 +260,7 @@ export default function AuditoriaLogs() {
                   value={filters.origem}
                   style={{
                     fontFamily: "'Cascadia Code', monospace",
-                    fontSize: 20,
+                    fontSize: 18,
                     background: "#27272a",
                     color: "#22d3ee",
                     border: "1px solid #22d3ee",
@@ -263,7 +279,7 @@ export default function AuditoriaLogs() {
                 style={{
                   color: "#22d3ee",
                   fontFamily: "'Cascadia Code', monospace",
-                  fontSize: 22,
+                  fontSize: 18,
                   display: "flex",
                   alignItems: "center",
                   gap: 10,
@@ -280,7 +296,7 @@ export default function AuditoriaLogs() {
                   value={filters.tipo}
                   style={{
                     fontFamily: "'Cascadia Code', monospace",
-                    fontSize: 20,
+                    fontSize: 18,
                     background: "#27272a",
                     color: "#22d3ee",
                     border: "1px solid #22d3ee",
@@ -301,7 +317,7 @@ export default function AuditoriaLogs() {
                 style={{
                   color: "#22d3ee",
                   fontFamily: "'Cascadia Code', monospace",
-                  fontSize: 22,
+                  fontSize: 18,
                   display: "flex",
                   alignItems: "center",
                   gap: 10,
@@ -319,7 +335,7 @@ export default function AuditoriaLogs() {
                   value={filters.data}
                   style={{
                     fontFamily: "'Cascadia Code', monospace",
-                    fontSize: 20,
+                    fontSize: 18,
                     background: "#27272a",
                     color: "#22d3ee",
                     border: "1px solid #22d3ee",
@@ -366,6 +382,7 @@ export default function AuditoriaLogs() {
             </div>
 
             <div
+              className={styles.auditoriaScrollContainer}
               style={{
                 padding: 0,
                 display: "flex",
@@ -380,11 +397,11 @@ export default function AuditoriaLogs() {
               }}
             >
               {loading ? (
-                <div style={{ color: "#a3e635", fontSize: 18, padding: 32 }}>
+                <div style={{ color: "#a3e635", fontSize: 12, padding: 32 }}>
                   Carregando logs...
                 </div>
               ) : filteredLogs.length === 0 ? (
-                <div style={{ color: "#ef4444", fontSize: 16, padding: 32 }}>
+                <div style={{ color: "#ef4444", fontSize: 12, padding: 32 }}>
                   Nenhum log encontrado.
                 </div>
               ) : (
@@ -440,7 +457,10 @@ export default function AuditoriaLogs() {
                           {log.status ? ` Status: ${log.status}` : ""}
                           {log.id ? ` ID: ${log.id}` : ""}
                           {log.detalhes && (
-                            <ExpandableJson data={log.detalhes} />
+                            <ExpandableJson
+                              data={log.detalhes}
+                              label="Detalhes"
+                            />
                           )}
                         </>
                       )}
@@ -451,20 +471,60 @@ export default function AuditoriaLogs() {
                             [{log.level?.toUpperCase()}]
                           </span>{" "}
                           {log.action ? `${log.action}: ` : ""}
-                          {log.message || log.mensagem}
-                          {log.details && (
+                          <span
+                            dangerouslySetInnerHTML={{
+                              __html: convertAnsiToHtml(
+                                log.messageWithoutJson ||
+                                  log.message ||
+                                  log.mensagem ||
+                                  ""
+                              ),
+                            }}
+                          />
+                          {/* Para logs de ação do servidor (type: server_action), mostra details se não há message */}
+                          {!log.message &&
+                            !log.messageWithoutJson &&
+                            !log.mensagem &&
+                            log.type === "server_action" &&
+                            log.details && (
+                              <span style={{ color: "#a1a1aa" }}>
+                                {log.details.usuario
+                                  ? `Usuario: ${log.details.usuario}`
+                                  : ""}
+                                {log.details.endpoint
+                                  ? ` | Endpoint: ${log.details.endpoint}`
+                                  : ""}
+                              </span>
+                            )}
+                          {/* Usar JSON já extraído pelo backend */}
+                          {log.extractedJson && (
                             <ExpandableJson
-                              data={log.details}
-                              label="details"
+                              data={log.extractedJson}
+                              label="Detalhes"
                             />
                           )}
+                          {/* Para logs de ação, mostrar details como JSON expandível se não há extractedJson */}
+                          {!log.extractedJson &&
+                            log.type === "server_action" &&
+                            log.details && (
+                              <ExpandableJson
+                                data={log.details}
+                                label="Detalhes"
+                              />
+                            )}
                         </>
                       )}
                       {/* Logs de auditoria */}
-                      {log.tipo === "auditoria" && <span>{log.mensagem}</span>}
+                      {log.tipo === "auditoria" && (
+                        <span
+                          dangerouslySetInnerHTML={{
+                            __html: convertAnsiToHtml(log.mensagem || ""),
+                          }}
+                        />
+                      )}
                       {/* Exibe todos os campos extras dinamicamente */}
                       {log.tipo === "acao" && (
-                        <span style={{ color: "#38bdf8", fontSize: 18 }}>
+                        <span style={{ color: "#38bdf8", fontSize: 12 }}>
                           {Object.entries(log)
                             .filter(
                               ([key]) =>

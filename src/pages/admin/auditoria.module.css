@@ -1,11 +1,16 @@
+
 @import url("https://fonts.googleapis.com/css2?family=Cascadia+Code:ital,wght@0,200..700;1,200..700&display=swap");
+
+.auditoriaScrollContainer{
+    margin-top: 15px;
+}
 
 .consoleLog {
   font-family: "Cascadia Code", monospace;
   background: #18181b;
   color: #22c55e;
   padding: 30px;
-  font-size: 20px;
+  font-size: 12px;
   overflow: auto;
   max-height: 100%;
   margin: 0;
@@ -15,15 +20,33 @@
   text-align: left;
   font-weight: 400;
   font-style: normal;
-  scrollbar-color: #22d3ee #18181b;
-  scrollbar-width: thin;
 }
 
+/* Barra de rolagem personalizada para ambas direções */
+
 .consoleLog::-webkit-scrollbar {
+  background: transparent;
   width: 8px;
-  background: #18181b;
+  height: 8px;
 }
+
 .consoleLog::-webkit-scrollbar-thumb {
-  background: #22d3ee;
-  border-radius: 8px;
+  background: #22c55e;
+}
+
+.consoleLog::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* Scrollbar vertical do container externo */
+.auditoriaScrollContainer::-webkit-scrollbar {
+  background: #18181b;
+  width: 8px;
+  height: 8px;
+}
+.auditoriaScrollContainer::-webkit-scrollbar-thumb {
+  background: #22c55e;
+}
+.auditoriaScrollContainer::-webkit-scrollbar-button {
+  display: none;
 }
