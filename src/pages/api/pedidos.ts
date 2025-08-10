@@ -72,13 +72,48 @@ export default async function handler(
       console.log("📨 [API] Processando POST para pedidos...");
       try {
         const { fields, files } = await parseForm(req);
+        console.log("[DEBUG] Files recebidos:", files);
 
         const fichaFile = Array.isArray(files.ficha)
           ? files.ficha[0]
           : files.ficha;
         const bulaFile = Array.isArray(files.bula) ? files.bula[0] : files.bula;
 
+        // Função utilitária para ler o buffer do arquivo
+        async function getFileBuffer(file: any) {
+          if (!file || !file.filepath) return null;
+          const fs = await import("fs/promises");
+          try {
+            const buffer = await fs.readFile(file.filepath);
+            console.log(
+              `[DEBUG] Buffer lido (${
+                file.originalFilename || file.newFilename
+              }):`,
+              buffer?.length,
+              typeof buffer
+            );
+            return buffer;
+          } catch (err) {
+            console.log(`[DEBUG] Erro ao ler buffer:`, err);
+            return null;
+          }
+        }
+
+        const fichaBuffer = await getFileBuffer(fichaFile);
+        const bulaBuffer = await getFileBuffer(bulaFile);
+        console.log(
+          "[DEBUG] Buffer ficha:",
+          fichaBuffer?.length,
+          typeof fichaBuffer
+        );
+        console.log(
+          "[DEBUG] Buffer bula:",
+          bulaBuffer?.length,
+          typeof bulaBuffer
+        );
+
         const pedido = {
+          // ...existing code...
           email: Array.isArray(fields.email) ? fields.email[0] : fields.email,
           nome: Array.isArray(fields.nome) ? fields.nome[0] : fields.nome,
           fabricante: Array.isArray(fields.fabricante)
@@ -95,6 +130,7 @@ export default async function handler(
                 nome: fichaFile.originalFilename || fichaFile.newFilename,
                 tamanho: fichaFile.size,
                 tipo: fichaFile.mimetype,
+                buffer: fichaBuffer ? Buffer.from(fichaBuffer) : null,
               }
             : null,
           bulaInfo: bulaFile
@@ -102,6 +138,7 @@ export default async function handler(
                 nome: bulaFile.originalFilename || bulaFile.newFilename,
                 tamanho: bulaFile.size,
                 tipo: bulaFile.mimetype,
+                buffer: bulaBuffer ? Buffer.from(bulaBuffer) : null,
               }
             : null,
           status: "pendente",
@@ -109,6 +146,7 @@ export default async function handler(
         };
 
         console.log("📋 [API] Objeto pedido criado:", pedido);
+        console.log("[DEBUG] Pedido a ser salvo:", pedido);
         console.log("💾 [API] Salvando no banco de dados...");
 
         const result = await pedidos.insertOne(pedido);
@@ -120,18 +158,32 @@ export default async function handler(
         // Descontar crédito do usuário e incrementar solicitacoesMes
         const users = db.collection("users");
         const usuario = await users.findOne({ email: pedido.email });
-        if (usuario && usuario.credito > 0) {
-          await users.updateOne(
-            { email: pedido.email },
-            {
-              $inc: { credito: -1, solicitacoesMes: 1 },
-            }
-          );
-          console.log(`🟢 Crédito descontado de ${pedido.email}`);
+        // Corrige tipo do campo credito para garantir operação $inc
+        if (usuario) {
+          let creditoAtual = usuario.credito;
+          if (typeof creditoAtual === "string") {
+            creditoAtual = parseInt(creditoAtual, 10);
+          }
+          if (typeof creditoAtual !== "number" || isNaN(creditoAtual)) {
+            creditoAtual = 0;
+          }
+          if (creditoAtual > 0) {
+            await users.updateOne({ email: pedido.email }, [
+              {
+                $set: {
+                  credito: { $subtract: [{ $toInt: "$credito" }, 1] },
+                  solicitacoesMes: {
+                    $add: [{ $ifNull: ["$solicitacoesMes", 0] }, 1],
+                  },
+                },
+              },
+            ]);
+            console.log(`🟢 Crédito descontado de ${pedido.email}`);
+          } else {
+            console.log(`⚠️ Usuário sem crédito: ${pedido.email}`);
+          }
         } else {
-          console.log(
-            `⚠️ Usuário não encontrado ou sem crédito: ${pedido.email}`
-          );
+          console.log(`⚠️ Usuário não encontrado: ${pedido.email}`);
         }
 
         return res.status(201).json({ ok: true, id: result.insertedId });
@@ -141,6 +193,31 @@ export default async function handler(
         return res
           .status(500)
           .json({ error: "Erro ao salvar pedido", details: err.message });
+      }
+    }
+
+    if (req.method === "DELETE") {
+      try {
+        const body = await readJsonBody(req);
+        const { id } = body;
+        if (!id) {
+          return res
+            .status(400)
+            .json({ error: "ID do pedido é obrigatório" });
+        }
+        const result = await pedidos.deleteOne({ _id: new ObjectId(id) });
+        if (result.deletedCount === 1) {
+          return res
+            .status(200)
+            .json({ ok: true, message: "Pedido excluído com sucesso" });
+        } else {
+          return res.status(404).json({ error: "Pedido não encontrado" });
+        }
+      } catch (err) {
+        console.error("❌ [API] Erro no DELETE:", err);
+        return res
+          .status(500)
+          .json({ error: "Erro ao excluir pedido", details: err.message });
       }
     }
 
