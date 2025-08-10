@@ -16,19 +16,35 @@ export default async function handler(
       .collection("configuracoes")
       .findOne({ chave: "global" });
     const creditoPadrao = config?.creditoPadrao ?? 0;
+
+    // Salvar histórico dos usuários antes de zerar
+    const cicloAtual = new Date();
+    const usuarios = await db.collection("users").find({ role: { $ne: "admin" } }).toArray();
+    if (usuarios.length > 0) {
+      const historico = usuarios.map(u => ({
+        usuarioId: u._id,
+        email: u.email,
+        nome: u.name,
+        credito: u.credito,
+        solicitacoesMes: u.solicitacoesMes ?? 0,
+        ciclo: cicloAtual,
+      }));
+      await db.collection("usuarios_historico").insertMany(historico);
+    }
+
+    // Zerar créditos e solicitações
     const result = await db
       .collection("users")
       .updateMany(
         { role: { $ne: "admin" } },
         { $set: { credito: creditoPadrao, solicitacoesMes: 0 } }
       );
-    res
-      .status(200)
-      .json({
-        success: true,
-        modifiedCount: result.modifiedCount,
-        creditoPadrao,
-      });
+    res.status(200).json({
+      success: true,
+      modifiedCount: result.modifiedCount,
+      creditoPadrao,
+      historicoSalvo: usuarios.length,
+    });
   } catch (error) {
     console.error("Erro ao reabastecer créditos:", error);
     res.status(500).json({ message: "Erro interno do servidor" });
