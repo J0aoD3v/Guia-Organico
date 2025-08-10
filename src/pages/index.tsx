@@ -39,6 +39,7 @@ export default function Home() {
     }
   }, [session]);
 
+  const router = require("next/router").useRouter();
   return (
     <>
       <Head>
@@ -153,6 +154,11 @@ export default function Home() {
                       : "pointer",
                 }}
                 disabled={creditosUsuario !== null && creditosUsuario <= 0}
+                onClick={() => {
+                  if (creditosUsuario !== null && creditosUsuario > 0) {
+                    router.push("/pedidos/novo");
+                  }
+                }}
               >
                 {creditosUsuario !== null && creditosUsuario <= 0 ? (
                   <span>
