@@ -72,10 +72,7 @@ export default async function handler(
       return res.status(404).json({ message: "Buffer inválido" });
     }
     res.setHeader("Content-Type", info.tipo || "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      `inline; filename=\"${info.nome}\"`
-    );
+    res.setHeader("Content-Disposition", `inline; filename=\"${info.nome}\"`);
     res.send(fileBuffer);
   } catch (error) {
     console.error("Erro ao baixar anexo:", error);
