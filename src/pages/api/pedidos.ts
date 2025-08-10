@@ -53,7 +53,7 @@ export default async function handler(
     console.log("✅ [API] Conectado ao MongoDB");
 
     if (req.method === "GET") {
-      const { email } = req.query;
+      const { email, status, categoria } = req.query;
       if (email) {
         const now = new Date();
         const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -64,7 +64,11 @@ export default async function handler(
         });
         return res.status(200).json({ count });
       }
-      const all = await pedidos.find({}).sort({ createdAt: -1 }).toArray();
+      // Monta filtro dinâmico
+      const filtro: any = {};
+      if (status) filtro.status = status;
+      if (categoria) filtro.categoria = categoria;
+      const all = await pedidos.find(filtro).sort({ createdAt: -1 }).toArray();
       return res.status(200).json(all);
     }
 
@@ -201,9 +205,7 @@ export default async function handler(
         const body = await readJsonBody(req);
         const { id } = body;
         if (!id) {
-          return res
-            .status(400)
-            .json({ error: "ID do pedido é obrigatório" });
+          return res.status(400).json({ error: "ID do pedido é obrigatório" });
         }
         const result = await pedidos.deleteOne({ _id: new ObjectId(id) });
         if (result.deletedCount === 1) {
