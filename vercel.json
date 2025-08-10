@@ -1,0 +1,8 @@
+{
+  "cron": [
+    {
+      "path": "/api/reabastecer-creditos",
+      "schedule": "0 0 1 * *"
+    }
+  ]
+}
